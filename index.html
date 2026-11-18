@@ -1,0 +1,962 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>갈매기 1300 프로젝트</title>
+<meta name="description" content="철인 3종 개인 기록 웹앱 - 운동 기록, 목표, 대회, 사진">
+<meta name="theme-color" content="#0F1E2B">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="갈매기1300">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: 사진 히어로 → 시즌 현황 → 부족한 부분 → 채우는 방법 → 2027 레이스 → 기록하기 → 연혁. 바다(수영)·라벤더(사이클)·부이 오렌지(런) 3종목 색 체계 */
+:root{
+  --bg:#F2F5F6; --surface:#FFFFFF; --surface-2:#E8EEF1; --ink:#0F1E2B; --muted:#5A6A77; --line:#D6DFE4;
+  --accent:#E8601C; --sea:#14506A;
+  --swim:#2585BC; --bike:#7556C0; --run:#E8601C; --weight:#4F6B7A;
+  --good:#23845A; --warn:#B87A06; --bad:#C2333F;
+  --good-bg:#E2F2EA; --warn-bg:#FBF0D9; --bad-bg:#FBE4E6;
+  --heat0:#E3E9EC;
+  --on-photo:#FFFFFF; --shade:rgba(8,20,30,.62);
+  --f-display:"Black Han Sans","IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-num:"Barlow Condensed","IBM Plex Sans KR",system-ui,sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B141B; --surface:#12202A; --surface-2:#182A36; --ink:#E6EDF1; --muted:#93A5B2; --line:#243541;
+  --accent:#FF8340; --sea:#7FC4E2;
+  --swim:#5DB4E8; --bike:#A88EEB; --run:#FF8340; --weight:#9AB3C1;
+  --good:#5CC793; --warn:#E9B341; --bad:#F06A73;
+  --good-bg:#15302A; --warn-bg:#33290F; --bad-bg:#3A1C21;
+  --heat0:#1B2B36; --shade:rgba(4,10,16,.7); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B141B; --surface:#12202A; --surface-2:#182A36; --ink:#E6EDF1; --muted:#93A5B2; --line:#243541;
+  --accent:#FF8340; --sea:#7FC4E2;
+  --swim:#5DB4E8; --bike:#A88EEB; --run:#FF8340; --weight:#9AB3C1;
+  --good:#5CC793; --warn:#E9B341; --bad:#F06A73;
+  --good-bg:#15302A; --warn-bg:#33290F; --bad-bg:#3A1C21;
+  --heat0:#1B2B36; --shade:rgba(4,10,16,.7); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{text-wrap:balance;margin:0}
+h2{font-family:var(--f-display);font-weight:400;font-size:clamp(26px,3.6vw,36px);letter-spacing:-.01em;line-height:1.2}
+h3{font-size:17px;font-weight:700}
+p{margin:0}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+a{color:var(--sea)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:18px;height:54px}
+.brand{font-family:var(--f-display);font-size:19px;white-space:nowrap;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:8px}
+.brand svg{flex:none}
+.nav ul{min-width:0;display:flex;gap:4px;list-style:none;margin:0 0 0 auto;padding:0;overflow-x:auto;scrollbar-width:none}
+.nav ul::-webkit-scrollbar{display:none}
+.nav a.link{display:block;padding:6px 10px;border-radius:6px;color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;white-space:nowrap}
+.nav a.link:hover{color:var(--ink);background:var(--surface-2)}
+@media (max-width:720px){.nav .wrap{gap:10px}.brand span{display:none}}
+
+/* hero */
+.hero{position:relative;color:var(--on-photo);background:#0d1a24 url(img/finish.jpg) center 38%/cover no-repeat}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--shade) 0%,rgba(8,20,30,.35) 55%,rgba(8,20,30,.1) 100%)}
+.hero .wrap{position:relative;z-index:1;padding-block:72px 40px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.9fr);gap:32px;align-items:end}
+.hero .eyebrow{color:rgba(255,255,255,.8)}
+.hero h1{font-family:var(--f-display);font-weight:400;font-size:clamp(40px,7vw,76px);line-height:1.02;margin-top:10px}
+.hero h1 em{font-style:normal;font-family:var(--f-num);font-weight:700;color:#FFB07E;letter-spacing:-.01em}
+.hero .lede{margin-top:16px;max-width:34em;font-size:16px;color:rgba(255,255,255,.92)}
+.goals-strip{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.goals-strip span{border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:4px 12px;font-size:13px;background:rgba(0,0,0,.18)}
+.race-card{background:rgba(10,22,32,.72);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.18);border-radius:var(--r);padding:20px 22px}
+.race-card .dday{font-family:var(--f-num);font-weight:700;font-size:64px;line-height:1}
+.race-card .row{display:flex;justify-content:space-between;gap:12px;border-top:1px solid rgba(255,255,255,.16);padding-top:10px;margin-top:12px;font-size:14px}
+.race-card .row b{font-family:var(--f-num);font-size:20px;font-weight:600}
+@media (max-width:820px){.hero .wrap{grid-template-columns:minmax(0,1fr);padding-block:56px 28px}}
+
+section{padding-block:56px}
+section + section{border-top:1px solid var(--line)}
+.sec-head{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px;margin-bottom:24px}
+.sec-head p{max-width:40em}
+
+/* season */
+.disc-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:860px){.disc-grid{grid-template-columns:minmax(0,1fr)}}
+.disc{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+.disc .photo{height:120px;background-size:cover;background-position:center;position:relative}
+.disc .photo span{position:absolute;left:14px;bottom:10px;color:#fff;font-family:var(--f-display);font-size:22px;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.disc .body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:12px}
+.big{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.big .v{font-family:var(--f-num);font-weight:700;font-size:44px;line-height:1}
+.big .g{color:var(--muted);font-size:14px}
+.bar{position:relative;height:10px;border-radius:5px;background:var(--surface-2);overflow:visible}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px}
+.bar .pace{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink)}
+.kv{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:14px}
+.kv dt{color:var(--muted)} .kv dd{margin:0;text-align:right;font-family:var(--f-num);font-size:17px;font-weight:600}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600;white-space:nowrap}
+.chip.bad{background:var(--bad-bg);color:var(--bad)} .chip.warn{background:var(--warn-bg);color:var(--warn)} .chip.good{background:var(--good-bg);color:var(--good)}
+.chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:5px 14px;font:inherit;font-size:14px;cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chart-wrap{overflow-x:auto;margin-top:14px}
+.chart-wrap svg{display:block;width:100%;min-width:560px;height:auto}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:14px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.two{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;margin-top:16px}
+@media (max-width:860px){.two{grid-template-columns:minmax(0,1fr)}}
+.heat{overflow-x:auto}
+.heat svg{display:block;min-width:620px;width:100%;height:auto}
+
+/* gaps */
+.gaps{display:grid;gap:10px}
+.gap{display:grid;grid-template-columns:110px minmax(0,1fr) minmax(0,auto);gap:16px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;border-left-width:4px}
+.gap.bad{border-left-color:var(--bad)} .gap.warn{border-left-color:var(--warn)} .gap.good{border-left-color:var(--good)}
+.gap .fig{font-family:var(--f-num);font-weight:700;font-size:26px;line-height:1.1;text-align:right;white-space:nowrap}
+.gap .fig small{display:block;font-size:12px;font-family:var(--f-body);font-weight:500;color:var(--muted)}
+.gap p{color:var(--muted);font-size:14px;margin-top:4px}
+@media (max-width:640px){.gap{grid-template-columns:minmax(0,1fr)}.gap .fig{text-align:left}}
+
+/* methods */
+.methods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:860px){.methods{grid-template-columns:minmax(0,1fr)}}
+.method{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px}
+.method header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.method ul{margin:0;padding-left:18px;display:grid;gap:6px;font-size:14.5px}
+.method .why{font-size:13px;color:var(--muted);margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+.week-table{overflow-x:auto;margin-top:16px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+th{font-size:12px;letter-spacing:.06em;color:var(--muted);font-weight:600}
+td.d{font-weight:700;white-space:nowrap}
+.tag{display:inline-block;font-size:12px;font-weight:600;border-radius:4px;padding:1px 7px;margin-right:4px;color:#fff}
+.tag.run{background:var(--run)} .tag.bike{background:var(--bike)} .tag.swim{background:var(--swim)} .tag.weight{background:var(--weight)} .tag.rest{background:var(--muted)}
+
+/* this week */
+.wk{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.wk .item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:grid;gap:8px}
+.wk .item .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.pips{display:flex;gap:5px}
+.pips b{width:18px;height:18px;border-radius:50%;border:2px solid var(--line)}
+.pips b.on{border-color:transparent}
+
+/* race */
+.split-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.split-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.split{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:grid;gap:4px}
+.split .t{font-family:var(--f-num);font-weight:700;font-size:34px;line-height:1}
+.split .p{font-size:13px;color:var(--muted)}
+.split .d{font-size:13px;font-weight:600}
+.timeline{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;margin-top:20px;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+.timeline > div{padding:14px 14px 16px;border-right:1px solid var(--line);font-size:13.5px;display:grid;gap:6px;align-content:start}
+.timeline > div:last-child{border-right:0}
+.timeline .when{font-family:var(--f-num);font-weight:600;font-size:15px;color:var(--muted)}
+.timeline .now{background:var(--surface-2);box-shadow:inset 0 3px 0 var(--accent)}
+.timeline .now .when{color:var(--accent)}
+@media (max-width:860px){.timeline{grid-template-columns:minmax(0,1fr)}.timeline > div{border-right:0;border-bottom:1px solid var(--line)}}
+
+/* log */
+.log-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:16px}
+@media (max-width:860px){.log-grid{grid-template-columns:minmax(0,1fr)}}
+form{display:grid;gap:12px}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+label{display:grid;gap:4px;font-size:13px;color:var(--muted);font-weight:500}
+input[type=text],input[type=number],input[type=date],select,textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%}
+textarea{min-height:64px;resize:vertical}
+.checks{display:flex;gap:16px;flex-wrap:wrap}
+.checks label{display:flex;align-items:center;gap:6px;color:var(--ink);font-size:14px}
+.btn{font:inherit;font-weight:600;font-size:15px;border:0;border-radius:8px;padding:10px 18px;background:var(--accent);color:#fff;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:4px 10px;font-size:13px}
+.status{font-size:13px;color:var(--muted);min-height:1.4em}
+.recent{display:grid;gap:0;max-height:520px;overflow:auto}
+.recent .r{display:grid;grid-template-columns:86px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 4px;border-bottom:1px solid var(--line);font-size:14px}
+.recent .r .dt{font-family:var(--f-num);font-weight:600;font-size:16px}
+.recent .r .note{color:var(--muted);font-size:13px;overflow-wrap:anywhere}
+.src{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 5px}
+details.settings{margin-top:16px}
+details.settings summary{cursor:pointer;font-weight:600}
+details.settings .fields{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:12px}
+@media (max-width:640px){details.settings .fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+fieldset{border:1px solid var(--line);border-radius:8px;padding:12px;margin:0}
+legend{font-size:13px;font-weight:600;padding:0 6px}
+
+/* history */
+.years{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:860px){.years{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.year{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.year .y{font-family:var(--f-num);font-weight:700;font-size:30px;line-height:1}
+.year dl{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:10px 0 0;font-size:14px}
+.year dt{color:var(--muted)} .year dd{margin:0;text-align:right;font-family:var(--f-num);font-weight:600;font-size:16px}
+.races{display:grid;gap:10px;margin-top:16px}
+.race{display:grid;grid-template-columns:120px minmax(0,1fr) auto;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 18px}
+.race .t{font-family:var(--f-num);font-weight:700;font-size:28px}
+@media (max-width:640px){.race{grid-template-columns:minmax(0,1fr)}}
+
+/* gallery */
+.gallery{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:860px){.gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.gallery figure{margin:0;position:relative;border-radius:var(--r);overflow:hidden;background:var(--surface-2);aspect-ratio:4/5;max-width:100%}
+.gallery img{width:100%;height:100%;object-fit:cover;display:block}
+.gallery figcaption{position:absolute;left:0;right:0;bottom:0;padding:24px 12px 10px;color:#fff;font-size:13px;background:linear-gradient(transparent,rgba(0,0,0,.6))}
+.gallery .del{position:absolute;top:8px;right:8px}
+.upload{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-top:14px}
+.upload label{min-width:180px;flex:1}
+footer{padding-block:28px 48px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .6s ease}}
+
+/* ===== 웹앱 추가 ===== */
+html{-webkit-text-size-adjust:100%}
+body{margin:0;padding-top:env(safe-area-inset-top,0px)}
+[hidden]{display:none!important}
+img{max-width:100%}
+body.locked{overflow:hidden}
+.conn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 10px;white-space:nowrap}
+.conn i{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.conn.ok i{background:var(--good)} .conn.wait i{background:var(--warn)} .conn.off i{background:var(--bad)}
+@media (max-width:720px){.nav ul{display:none}.conn{margin-left:auto}.brand span{display:inline}}
+section,header.hero{scroll-margin-top:60px}
+.span2{grid-column:1/-1}
+.fields.f3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.fields.f4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:640px){.fields.f4{grid-template-columns:repeat(2,minmax(0,1fr))}.fields.f3{grid-template-columns:repeat(3,minmax(0,1fr))}}
+#goalForm{display:grid;gap:14px}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn.danger{background:var(--bad-bg);color:var(--bad)}
+.chip.done{background:var(--surface-2);color:var(--muted)}
+.race.tap,.r.tap,.gallery figure{cursor:pointer}
+.race.tap:hover{border-color:var(--sea)}
+.r.tap:hover{background:var(--surface-2)}
+.gallery figcaption small{display:block;opacity:.8;font-size:11.5px}
+select{appearance:auto}
+.tabbar{display:none}
+@media (max-width:760px){
+  body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+  .tabbar{display:grid;grid-template-columns:repeat(5,1fr);align-items:center;position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);
+    padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+  .tabbar a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;color:var(--muted);text-decoration:none;padding:4px 0}
+  .tabbar svg{width:22px;height:22px}
+  .tab-add{justify-self:center;width:54px;height:54px;border-radius:50%;border:0;background:var(--accent);color:#fff;display:grid;place-items:center;margin-top:-22px;box-shadow:0 6px 16px rgba(232,96,28,.35);cursor:pointer}
+  .tab-add svg{width:26px;height:26px}
+}
+.veil{position:fixed;inset:0;z-index:40;background:rgba(6,14,20,.5);display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);color:var(--ink);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;border-radius:18px 18px 0 0;
+  padding:8px max(18px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px));display:grid;gap:12px}
+@media (min-width:761px){.veil{align-items:center}.sheet{border-radius:14px;padding:20px 24px}.grab{display:none}}
+.grab{width:40px;height:4px;border-radius:9px;background:var(--line);margin:4px auto 2px}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.sheet-head h3{font-family:var(--f-display);font-weight:400;font-size:22px}
+.x{border:0;background:var(--surface-2);color:var(--ink);width:36px;height:36px;border-radius:50%;font-size:22px;line-height:1;cursor:pointer}
+.sheet input[type=number],.sheet input[type=text],.sheet input[type=date],.sheet select,.sheet textarea{font-size:16px}
+.sheet input[type=file]{font-size:14px;color:var(--ink)}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .2s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;max-width:90%;text-align:center}
+</style>
+</head>
+<body>
+<nav class="nav" aria-label="섹션">
+  <div class="wrap">
+    <a class="brand" href="#top"><svg width="26" height="16" viewBox="0 0 26 16" aria-hidden="true"><path d="M1 9 C5 3 9 3 13 9 C17 3 21 3 25 9" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="round"/></svg><span>갈매기 1300</span></a>
+    <span class="conn" id="conn"><i></i><b>연결 중</b></span>
+    <ul>
+      <li><a class="link" href="#season">시즌 현황</a></li>
+      <li><a class="link" href="#gaps">부족한 부분</a></li>
+      <li><a class="link" href="#methods">채우는 방법</a></li>
+      <li><a class="link" href="#race">대회</a></li>
+      <li><a class="link" href="#log">기록</a></li>
+      <li><a class="link" href="#history">연혁·사진</a></li>
+      <li><a class="link" href="#goals">목표 설정</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Seagull 1300 Project · since 2023.09</p>
+      <h1>갈매기 <em>1300</em><br>프로젝트</h1>
+      <p class="lede">실외 GPS 기록으로 쌓는 나만의 철인 3종 기록장. 올해의 마일리지, 비어 있는 곳, 채우는 방법을 한 화면에서 봅니다.</p>
+      <div class="goals-strip" id="goalStrip"></div>
+    </div>
+    <aside class="race-card" aria-label="다음 레이스">
+      <p class="eyebrow" style="color:rgba(255,255,255,.75)" id="raceEyebrow">다음 레이스</p>
+      <div style="display:flex;align-items:baseline;gap:10px;margin-top:8px"><span class="dday" id="dday">D-</span><span id="raceDate" style="font-size:14px;opacity:.85"></span></div>
+      <div class="row"><span>지난 기록</span><b id="heroPrev">5:16</b></div>
+      <div class="row"><span>목표</span><b id="heroTarget">4:40</b></div>
+      <div class="row"><span>줄여야 할 시간</span><b id="heroCut">-36분</b></div>
+    </aside>
+  </div>
+</header>
+
+<main>
+<section id="season"><div class="wrap">
+  <div class="sec-head">
+    <div><p class="eyebrow" id="seasonEyebrow">Season</p><h2>올해 얼마나 왔나</h2></div>
+    <p class="muted">엑셀 기록(2026년 11월 6일까지)과 이 앱에 남긴 기록을 합산합니다. 검은 눈금은 "오늘까지 와 있어야 할 거리"입니다.</p>
+  </div>
+  <div class="disc-grid" id="discGrid"></div>
+
+  <div class="two">
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <h3>월별 거리</h3>
+        <div class="tabs" role="group" aria-label="종목">
+          <button class="tab" data-d="run" aria-pressed="true">달리기</button>
+          <button class="tab" data-d="bike" aria-pressed="false">사이클</button>
+          <button class="tab" data-d="swim" aria-pressed="false">수영</button>
+        </div>
+      </div>
+      <div class="chart-wrap" id="chart"></div>
+      <div class="legend" id="chartLegend"></div>
+    </div>
+    <div class="panel">
+      <h3>이번 주 체크</h3>
+      <p class="muted" style="font-size:13px;margin-top:2px" id="wkRange"></p>
+      <div class="wk" id="week" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:baseline">
+      <h3 id="heatTitle">운동 캘린더</h3>
+      <span class="muted" style="font-size:13px">칸 색이 진할수록 그날 한 종목이 많음 (런·사이클·수영·웨이트)</span>
+    </div>
+    <div class="heat" id="heat" style="margin-top:12px"></div>
+  </div>
+</div></section>
+
+<section id="gaps"><div class="wrap">
+  <div class="sec-head">
+    <div><p class="eyebrow">Diagnosis · 2026.11 기준</p><h2>부족한 부분</h2></div>
+    <p class="muted">2026년 1월~11월 6일 엑셀 기록에서 뽑은 진단입니다. 빨강은 지금 바로 메워야 할 곳, 노랑은 관리가 필요한 곳, 초록은 잘 지키고 있는 습관입니다.</p>
+  </div>
+  <div class="gaps">
+    <div class="gap bad"><span class="chip bad">시급</span><div><h3>달리기가 10월부터 거의 멈췄어요</h3><p>10월 20.2km(3회), 11월 초 18.5km(2회). 상반기 월평균 98km의 5분의 1 수준이었습니다.</p></div><div class="fig num">20.2km<small>10월 런</small></div></div>
+    <div class="gap bad"><span class="chip bad">시급</span><div><h3>사이클은 하반기에 공백</h3><p>2~6월 1,954km를 탔지만 7~10월은 4개월 합계 220km(7·8월 0km). 겨울엔 실내 로라로 이어가야 3월에 다시 시작하지 않아도 됩니다.</p></div><div class="fig num">220km<small>7~10월 합계</small></div></div>
+    <div class="gap warn"><span class="chip warn">관리</span><div><h3>수영은 자주 가지만 한 번에 짧게</h3><p>7~10월 34회, 1회 평균 약 1.3km. 레이스 거리 1.9km보다 짧고, 연 목표 130km 중 70.7km(54%)로 달성률이 가장 낮았습니다.</p></div><div class="fig num">54%<small>수영 연 목표</small></div></div>
+    <div class="gap warn"><span class="chip warn">관리</span><div><h3>통증이 반복해서 훈련을 끊어요</h3><p>1월 허리 통증, 3월 왼쪽 무릎 염증으로 잠정 휴식, 4월 계양산 트레일런 중 무릎 통증, 8월 메모 "근력 부족 - 통증 발생". 2025년 11월엔 팔꿈치 엘보도 있었습니다.</p></div><div class="fig num">4회<small>올해 통증 메모</small></div></div>
+    <div class="gap warn"><span class="chip warn">관리</span><div><h3>70.3 레이스 후반 런이 무너짐</h3><p>2026 고성 70.3 계획은 런 1시간 40분, 실제는 계획보다 약 15분 더 걸려 5시간 16분 완주. 바이크 뒤 달리기(브릭) 경험이 더 필요합니다.</p></div><div class="fig num">+15분<small>런 계획 대비</small></div></div>
+    <div class="gap good"><span class="chip good">잘하는 중</span><div><h3>웨이트와 수영 출석은 꾸준해요</h3><p>7~10월 웨이트 매달 5~9회, 수영 매달 7~11회. 이 습관을 그대로 두고 런·사이클을 다시 얹는 게 이번 겨울의 핵심입니다.</p></div><div class="fig num">27회<small>7~10월 웨이트</small></div></div>
+  </div>
+</div></section>
+
+<section id="methods"><div class="wrap">
+  <div class="sec-head">
+    <div><p class="eyebrow">How to fill</p><h2>채우는 방법</h2></div>
+    <p class="muted">부족한 부분마다 이번 겨울에 할 일을 정리했습니다. 통증이 며칠 이어지면 강도를 낮추고 진료를 먼저 받으세요.</p>
+  </div>
+  <div class="methods">
+    <article class="method"><header><span class="dot" style="background:var(--run)"></span><h3>달리기 다시 쌓기</h3></header>
+      <ul>
+        <li>주 3회 요일 고정: 화 조깅 8km · 목 템포 6~8km · 토 LSD 12km에서 시작해 18km까지</li>
+        <li>주간 거리는 한 번에 10%씩만 늘리기 (20 → 22 → 25km)</li>
+        <li>무릎이 회복될 때까지 트레일·급내리막 코스는 보류</li>
+        <li>케이던스 170~180, 보폭을 짧게 가져가 무릎 충격 줄이기</li>
+      </ul>
+      <p class="why">목표: 주 25km. 겨울 8주면 약 200km.</p>
+    </article>
+    <article class="method"><header><span class="dot" style="background:var(--bike)"></span><h3>겨울 사이클은 실내 로라로</h3></header>
+      <ul>
+        <li>싸이플러스 T2 로라 주 2회: ① Z2 60~90분 ② 스윗스팟 20분 × 2</li>
+        <li>로라 탈 때 TT바 에어로 자세를 20분 이상 유지하는 연습</li>
+        <li>주말 로라 뒤 바로 3km 런으로 근전환</li>
+        <li>날 좋은 휴일엔 아라뱃길·한강 40~60km로 야외 감각 유지</li>
+      </ul>
+      <p class="why">목표: 주 70km. 겨울 8주면 약 560km.</p>
+    </article>
+    <article class="method"><header><span class="dot" style="background:var(--swim)"></span><h3>수영 1회 거리 늘리기</h3></header>
+      <ul>
+        <li>1회 1.3km → 2km: 워밍업 300 + 메인 1,400 + 쿨다운 300</li>
+        <li>메인 세트: 100m × 10, 휴식 15초, 같은 페이스 유지</li>
+        <li>월 1회 1,900m 연속 수영 타임 테스트, 기록 메모에 남기기</li>
+        <li>주 1회 영법 드릴 (캐치업, 6킥 1스트로크)</li>
+      </ul>
+      <p class="why">목표: 주 4.5km. 레이스 1.9km를 쉬지 않고 36분 안에.</p>
+    </article>
+    <article class="method"><header><span class="dot" style="background:var(--weight)"></span><h3>통증 줄이는 근력·회복</h3></header>
+      <ul>
+        <li>주 2회 하체·코어: 스쿼트, 런지, 힙브릿지, 데드버그, 플랭크</li>
+        <li>런 전 동적 스트레칭 10분, 런 후 폼롤러로 허벅지·종아리</li>
+        <li>통증 메모가 생기면 그 주는 강도 대신 거리를 줄이기</li>
+        <li>바꿈터 리허설 월 1회 (슈트 → 헬멧 → 신발), 10분을 6분으로</li>
+      </ul>
+      <p class="why">지금 하는 웨이트 습관을 유지하면서 회복 루틴만 추가.</p>
+    </article>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <h3>겨울 한 주 예시</h3>
+    <div class="week-table"><table>
+      <thead><tr><th>요일</th><th>훈련</th><th>포인트</th></tr></thead>
+      <tbody>
+        <tr><td class="d">월</td><td><span class="tag rest">휴식</span></td><td class="muted">스트레칭 · 폼롤러</td></tr>
+        <tr><td class="d">화</td><td><span class="tag run">런</span>조깅 8km <span class="tag weight">코어</span></td><td class="muted">대화 가능한 페이스</td></tr>
+        <tr><td class="d">수</td><td><span class="tag swim">수영</span>1.5~2km</td><td class="muted">드릴 + 지속 수영</td></tr>
+        <tr><td class="d">목</td><td><span class="tag weight">웨이트</span>하체 <span class="tag run">런</span>템포 6km</td><td class="muted">템포 4'40"~5'00"/km</td></tr>
+        <tr><td class="d">금</td><td><span class="tag swim">수영</span>100m × 10 <span class="tag bike">로라</span>Z2 60분</td><td class="muted">같은 날 오전/오후 분리</td></tr>
+        <tr><td class="d">토</td><td><span class="tag run">런</span>LSD 12~18km</td><td class="muted">주간 거리의 40% 이내</td></tr>
+        <tr><td class="d">일</td><td><span class="tag bike">로라</span>스윗스팟 90분 <span class="tag run">런</span>3km <span class="tag swim">수영</span>1km</td><td class="muted">근전환(브릭)</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</div></section>
+
+<section id="race"><div class="wrap">
+  <div class="sec-head">
+    <div><p class="eyebrow">Race plan</p><h2>대회 목표</h2></div>
+    <p class="muted" id="raceSub">수영 1.9km · 사이클 90km · 달리기 21.1km. 종목별로 나눈 목표 시간이며 "목표 설정"에서 바꿀 수 있어요.</p>
+  </div>
+  <div class="split-grid" id="splits"></div>
+  <p class="muted" style="margin-top:10px;font-size:14px" id="splitSum"></p>
+  <div class="timeline" id="timeline"></div>
+
+  <div class="panel" style="margin-top:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h3>참가 대회</h3><button class="btn sm" type="button" data-open="race">+ 대회 추가</button></div>
+    <p class="muted" style="font-size:13px;margin-top:2px">다가오는 대회는 D-day 순, 끝난 대회는 결과와 함께 아래에 남습니다. 대회를 누르면 수정할 수 있어요.</p>
+    <div class="races" id="raceList"></div>
+  </div>
+</div></section>
+
+<section id="log"><div class="wrap">
+  <div class="sec-head">
+    <div><p class="eyebrow">Training log</p><h2>운동 기록</h2></div>
+    <button class="btn" type="button" data-open="log">+ 오늘 기록하기</button>
+  </div>
+  <div class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap"><h3>최근 기록</h3><span class="muted" style="font-size:13px">내 기록을 누르면 수정·삭제할 수 있어요 · <span class="src">엑셀</span> 은 기존 엑셀 기록</span></div>
+    <div class="recent" id="recent" style="margin-top:8px"></div>
+    <button class="btn ghost sm" type="button" id="moreBtn" style="margin-top:10px">더 보기</button>
+  </div>
+</div></section>
+
+<section id="history"><div class="wrap">
+  <div class="sec-head">
+    <div><p class="eyebrow">Since 2023</p><h2>갈매기 프로젝트 연혁</h2></div>
+    <p class="muted">2023년 9월 "1300KM 한계에 도전"으로 시작한 기록입니다. 하루 최장 달리기는 2023년 10월의 52.14km.</p>
+  </div>
+  <div class="years" id="years"></div>
+
+  <div class="sec-head" style="margin-top:40px;margin-bottom:14px"><div><h3>대회 사진</h3><p class="muted" style="font-size:13px">휴대폰 사진을 올리면 자동으로 줄여서 저장해요. 사진을 누르면 크게 보고 지울 수 있어요.</p></div><button class="btn sm" type="button" data-open="photo">+ 사진 추가</button></div>
+  <div class="gallery" id="gallery"></div>
+</div></section>
+
+<section id="goals"><div class="wrap">
+  <div class="sec-head"><div><p class="eyebrow">Settings</p><h2>목표 설정</h2></div><p class="muted">연간 목표, 주간 목표, 메인 대회 목표 시간을 바꾸면 홈 화면 전체에 바로 반영돼요.</p></div>
+  <form id="goalForm" class="panel" autocomplete="off">
+    <fieldset><legend>올해 목표 거리 (km)</legend><div class="fields f3">
+      <label for="aRun">달리기<input type="number" id="aRun" min="0" step="10" inputmode="decimal"></label>
+      <label for="aBike">사이클<input type="number" id="aBike" min="0" step="10" inputmode="decimal"></label>
+      <label for="aSwim">수영<input type="number" id="aSwim" min="0" step="1" inputmode="decimal"></label>
+    </div></fieldset>
+    <fieldset><legend>현실 목표 (연말까지, km)</legend><div class="fields f3">
+      <label for="gRun">달리기<input type="number" id="gRun" min="0" step="10" inputmode="decimal"></label>
+      <label for="gBike">사이클<input type="number" id="gBike" min="0" step="10" inputmode="decimal"></label>
+      <label for="gSwim">수영<input type="number" id="gSwim" min="0" step="1" inputmode="decimal"></label>
+    </div></fieldset>
+    <fieldset><legend>주간 목표</legend><div class="fields f4">
+      <label for="wRunKm">런 km<input type="number" id="wRunKm" min="0" step="1" inputmode="decimal"></label>
+      <label for="wRunN">런 횟수<input type="number" id="wRunN" min="0" step="1" inputmode="numeric"></label>
+      <label for="wBikeKm">사이클 km<input type="number" id="wBikeKm" min="0" step="5" inputmode="decimal"></label>
+      <label for="wBikeN">사이클 횟수<input type="number" id="wBikeN" min="0" step="1" inputmode="numeric"></label>
+      <label for="wSwimKm">수영 km<input type="number" id="wSwimKm" min="0" step="0.5" inputmode="decimal"></label>
+      <label for="wSwimN">수영 횟수<input type="number" id="wSwimN" min="0" step="1" inputmode="numeric"></label>
+      <label for="wWeightN">웨이트 횟수<input type="number" id="wWeightN" min="0" step="1" inputmode="numeric"></label>
+    </div></fieldset>
+    <fieldset><legend>메인 대회 (분 단위)</legend><div class="fields f4">
+      <label for="rName" class="span2">대회명<input type="text" id="rName"></label>
+      <label for="rDate">대회일<input type="date" id="rDate"></label>
+      <label for="rPrev">지난 기록 (분)<input type="number" id="rPrev" min="0" step="1" inputmode="numeric"></label>
+      <label for="rSwim">수영<input type="number" id="rSwim" min="0" step="1" inputmode="numeric"></label>
+      <label for="rT">바꿈터<input type="number" id="rT" min="0" step="1" inputmode="numeric"></label>
+      <label for="rBike">사이클<input type="number" id="rBike" min="0" step="1" inputmode="numeric"></label>
+      <label for="rRun">달리기<input type="number" id="rRun" min="0" step="1" inputmode="numeric"></label>
+    </div></fieldset>
+    <div class="actions"><button class="btn" type="submit" id="gSave">목표 저장</button><span class="status" id="goalStatus" role="status"></span></div>
+  </form>
+</div></section>
+</main>
+<footer><div class="wrap">갈매기 1300 프로젝트 · 실외 GPS 기록만 인정 · 엑셀 기록 2023.09 ~ 2026.11.06 반영</div></footer>
+
+<nav class="tabbar" aria-label="빠른 이동">
+  <a href="#top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 11l8-6 8 6v8H4z"/></svg>홈</a>
+  <a href="#season"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 19V9M10 19V5M15 19v-7M20 19v-4"/></svg>현황</a>
+  <button type="button" class="tab-add" data-open="log" aria-label="오늘 기록하기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg></button>
+  <a href="#race"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 21V4M6 4h11l-2 4 2 4H6"/></svg>대회</a>
+  <a href="#history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/></svg>사진</a>
+</nav>
+
+<div class="veil" id="veil" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="grab"></div>
+    <div class="sheet-head"><h3 id="sheetTitle"></h3><button type="button" class="x" id="sheetClose" aria-label="닫기">×</button></div>
+
+    <form id="logForm" autocomplete="off" hidden>
+      <input type="hidden" id="fId">
+      <div class="fields">
+        <label for="fDate" class="span2">날짜<input type="date" id="fDate" required></label>
+        <label for="fRun">달리기 (km)<input type="number" id="fRun" min="0" step="0.01" inputmode="decimal" placeholder="0"></label>
+        <label for="fBike">사이클 (km)<input type="number" id="fBike" min="0" step="0.1" inputmode="decimal" placeholder="0"></label>
+        <label for="fSwim">수영 (m)<input type="number" id="fSwim" min="0" step="25" inputmode="numeric" placeholder="0"></label>
+        <label for="fTime">운동 시간 (분)<input type="number" id="fTime" min="0" step="1" inputmode="numeric" placeholder="선택"></label>
+      </div>
+      <div class="checks">
+        <label for="fWeight"><input type="checkbox" id="fWeight"> 웨이트</label>
+        <label for="fBrick"><input type="checkbox" id="fBrick"> 브릭(근전환)</label>
+        <label for="fPain"><input type="checkbox" id="fPain"> 통증 있음</label>
+      </div>
+      <label for="fMemo">메모<textarea id="fMemo" placeholder="예) 평로라 Z2, 무릎 괜찮음 / 1,900m 연속 38분"></textarea></label>
+      <div class="actions"><button class="btn" type="submit" id="fSave">기록 저장</button><button class="btn danger" type="button" id="fDel" hidden>삭제</button><span class="status" id="logStatus" role="status"></span></div>
+    </form>
+
+    <form id="raceForm" autocomplete="off" hidden>
+      <input type="hidden" id="rcId">
+      <div class="fields">
+        <label for="rcName" class="span2">대회명<input type="text" id="rcName" placeholder="예) 통영 철인3종" required></label>
+        <label for="rcDate">날짜<input type="date" id="rcDate" required></label>
+        <label for="rcType">종목
+          <select id="rcType"><option>철인 70.3 (하프)</option><option>철인 풀코스</option><option>올림픽 코스</option><option>스프린트</option><option>하프 마라톤</option><option>풀 마라톤</option><option>10km 마라톤</option><option>그란폰도·자전거</option><option>오픈워터 수영</option><option>기타</option></select></label>
+        <label for="rcTarget">목표 기록<input type="text" id="rcTarget" placeholder="예) 2:30"></label>
+        <label for="rcResult">결과 기록<input type="text" id="rcResult" placeholder="예) 2:40, AG 9위"></label>
+        <label for="rcMemo" class="span2">메모<input type="text" id="rcMemo" placeholder="접수 마감, 장소, 숙소 등"></label>
+      </div>
+      <div class="actions"><button class="btn" type="submit" id="rcSave">대회 저장</button><button class="btn danger" type="button" id="rcDel" hidden>삭제</button><span class="status" id="rcStatus" role="status"></span></div>
+    </form>
+
+    <form id="photoForm" autocomplete="off" hidden>
+      <div class="fields">
+        <label for="pFile" class="span2">사진<input type="file" id="pFile" accept="image/*"></label>
+        <label for="pCap" class="span2">설명<input type="text" id="pCap" placeholder="예) 2027 고성 70.3 피니시"></label>
+        <label for="pDate">날짜<input type="date" id="pDate"></label>
+      </div>
+      <img id="pPreview" alt="" hidden style="max-height:200px;border-radius:8px;object-fit:cover">
+      <div class="actions"><button class="btn" type="submit" id="pSave">사진 올리기</button><span class="status" id="pStatus" role="status"></span></div>
+    </form>
+
+    <div id="photoView" hidden>
+      <img id="pvImg" alt="" style="width:100%;max-height:70vh;object-fit:contain;border-radius:8px;background:var(--surface-2)">
+      <p id="pvCap" style="margin-top:8px"></p>
+      <div class="actions"><button class="btn danger" type="button" id="pvDel" hidden>이 사진 삭제</button><span class="status" id="pvStatus" role="status"></span></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ===== Firebase 설정 (사우나 프로그램과 같은 프로젝트, 컬렉션 이름만 gull_ 로 분리) ===== */
+const FIREBASE_CONFIG={apiKey:"AIzaSyABtJnwGMAhEPEfsSCSf_cd6glzB_Fwan08",authDomain:"test-f82c9.firebaseapp.com",projectId:"test-f82c9",
+  storageBucket:"test-f82c9.firebasestorage.app",messagingSenderId:"1064652444751",appId:"1:1064652444751:web:0788f6687896aedf82063a"};
+const COL={logs:"gull_logs",races:"gull_races",photos:"gull_photos",meta:"gull_meta"};
+
+/* ===== 엑셀에서 옮긴 기록 ===== */
+const SUMMARY = {
+  goals:{2024:{run:1300,bike:777,swim:null},2025:{run:1300,bike:3000,swim:30},2026:{run:1300,bike:3000,swim:130}},
+  months:{
+    2024:{run:[76.33,6.26,130.6,129.19,138.24,91.28,119.5,69.9,85.5,70.04,75.6,45.74],bike:[0,0,91.4,190.85,40.92,119.55,0,0,135.13,0,43.73,0],swim:null},
+    2025:{run:[91.94,112.31,69.56,63.49,120.15,113.13,49.09,106.37,104.87,104.26,26.43,105.64],bike:[0,0,0,97,67,203,94,339,204,0,51.51,0],swim:[0,0,0,0,1.5,4.6,1.5,11.8,7.1,11.5,0,1.3]},
+    2026:{run:[98.09,105.02,77.48,112.38,131.31,65.52,59.74,79.35,81.4,20.2,18.5,0],bike:[0,89.06,121,608,791,345,0,0,180,40,0,0],swim:[10.5,4.8,0,2.6,5.5,5.8,10.6,13.5,10.6,6.8,0,0]}
+  },
+  y2023:{run:747.66,bike:192.3}
+};
+const DAILY = [["2026-01-01",8.08,0,0,1,"오전 웨이트"],["2026-01-02",9.29,1000,0,0,"오전 수영 1,000m"],["2026-01-03",0,0,0,1,"웨이트"],["2026-01-04",0,1000,0,0,"오전 수영 1,000m"],["2026-01-06",0,0,0,1,"웨이트"],["2026-01-07",6.39,0,0,0,""],["2026-01-08",5,0,0,1,"트레드밀 / 웨이트"],["2026-01-09",10.39,1000,0,0,"오전 수영 1,000m"],["2026-01-11",9.89,0,0,0,""],["2026-01-13",0,0,0,1,"웨이트"],["2026-01-16",10.31,0,0,0,""],["2026-01-17",0,0,0,1,"웨이트 중량 및 강도 업"],["2026-01-18",9.75,1100,0,0,"오전 수영 1,100m"],["2026-01-20",0,0,0,0,"허리 통증"],["2026-01-21",0,0,0,1,"허리 통증 /오전 웨이트"],["2026-01-22",0,1600,0,0,"허리통증 /수영 1,600m"],["2026-01-23",0,1850,0,0,"수영 1,850m"],["2026-01-25",9.07,1000,0,0,"오전 수영 1,000m"],["2026-01-28",8.5,0,0,1,"오전 웨이트"],["2026-01-29",0,1000,0,0,"오전 수영 1,000m"],["2026-01-30",0,1000,0,0,"오전 수영 1,000m"],["2026-01-31",11.42,0,0,0,""],["2026-02-01",8.01,700,0,0,"오전 수영 700m"],["2026-02-04",12.87,1100,0,0,"오전 수영 1100m"],["2026-02-05",0,700,0,0,"오전 수영 700m"],["2026-02-06",0,1100,0,0,"오전 수영 1100m"],["2026-02-07",11.02,0,0,0,""],["2026-02-12",9.56,1200,0,0,"오전 수영 1200m"],["2026-02-13",6.71,0,0,0,""],["2026-02-16",0,0,0,0,"로드 싸이클 42.6"],["2026-02-17",6.63,0,0,0,""],["2026-02-18",10.27,0,0,0,""],["2026-02-20",5.91,0,0,0,"오전 런 어지러움 발생"],["2026-02-21",10.65,0,0,0,""],["2026-02-23",5.98,0,0,0,""],["2026-02-26",12.51,0,0,0,""],["2026-02-27",4.9,0,0,0,"로드 싸이클 46.46"],["2026-03-01",5.95,0,0,0,""],["2026-03-05",14.45,0,0,0,""],["2026-03-08",16.22,0,0,0,""],["2026-03-11",6.46,0,0,0,""],["2026-03-13",0,0,0,0,"왼쪽 무릅 염증 물참"],["2026-03-14",6.8,0,0,0,""],["2026-03-16",11.49,0,0,0,"운동 불가능 잠정 휴식기"],["2026-03-17",0,0,0,0,"무릎 상태 체크"],["2026-03-26",0,0,10.0,0,"오전 고정식 싸이클 10km"],["2026-03-27",5.05,0,0,0,""],["2026-03-28",0,0,20.0,0,"고정 싸이클 20km"],["2026-03-30",0,0,0,0,"싸이클 71.56(영종도)"],["2026-03-31",11.06,0,20.0,0,"고정 싸이클 20km"],["2026-04-01",0,0,0,1,"오전 웨이트 / 오후 휴식"],["2026-04-02",11.25,0,0,1,"오전 웨이트 / 오후 휴식"],["2026-04-03",0,0,0,1,"오전 웨이트 / 고정 싸이클20KM"],["2026-04-04",5.39,0,0,0,""],["2026-04-05",4,0,0,0,"고정 싸이클 20KM"],["2026-04-06",0,0,0,0,"파주 헤이리 104KM"],["2026-04-07",13.3,0,0,0,""],["2026-04-08",0,0,0,0,"오전 바디트레이닝"],["2026-04-09",0,0,0,1,"오전 웨이트 / 평로라 40KM"],["2026-04-10",3.2,0,0,1,"오전 웨이트"],["2026-04-11",6.6,0,50.0,0,"평로라 50km"],["2026-04-12",0,0,0,0,"휴식"],["2026-04-13",0,0,76.58,0,"한강 남북 76.58km"],["2026-04-14",17.34,0,0,0,"계양산 트레일런(무릎 통증)"],["2026-04-15",5,0,35.0,0,"평로라 35km / 근전환운동"],["2026-04-16",0,0,0,1,"오전 웨이트 / 오후 회복휴식"],["2026-04-17",10.5,0,40.0,0,"오전 달리기 / 평로라 40km"],["2026-04-18",7.5,1100,0,0,"오전 수영 1,100m"],["2026-04-19",0,0,0,0,"자전거 행어 파손"],["2026-04-20",0,0,0,0,"원주/홍천/ 춘천(잉글랜드)"],["2026-04-21",0,0,0,0,"인준/용남/영국"],["2026-04-23",16,0,0,0,"오전/ 오후 야외 런"],["2026-04-24",0,0,0,1,"오전 웨이트 / 자전거 수리"],["2026-04-25",5,0,45.0,0,"평로라 40km / 근전환런 5km"],["2026-04-26",7.3,700,0,0,"오전 수영 700m"],["2026-04-27",0,0,136.58,0,"136.58km 팔당(테스트라이딩)"],["2026-04-28",0,0,0,0,"완전 휴식"],["2026-04-29",0,0,45.0,1,"오전 웨이트 / 평로라45km"],["2026-04-30",0,0,0,0,"오전수영 800"],["2026-05-01",6,0,46.0,0,"근전전환 런 6km/평로라40km"],["2026-05-02",0,800,0,0,"오전수영 800m"],["2026-05-03",6,0,56.0,0,"오전 조깅 6km /평로라50km"],["2026-05-04",10.1,0,0,0,""],["2026-05-05",0,500,0,0,"오전 수영 500m"],["2026-05-06",0,0,43.3,0,"싸이클 43.3km"],["2026-05-07",0,0,53.0,0,"평로라 53km"],["2026-05-08",10,0,0,0,"실내 트레드밀 빌드업"],["2026-05-09",11.51,0,0,0,""],["2026-05-10",3,0,58.0,0,"평로라 55km / 근전환 3km"],["2026-05-11",0,0,43.3,0,"싸이클 43.3km"],["2026-05-12",14,0,0,0,""],["2026-05-13",0,0,0,0,"휴식"],["2026-05-14",2,0,52.0,0,"평로라50km / 근전환 2km"],["2026-05-15",3.5,0,0,0,""],["2026-05-16",13.91,0,0,0,""],["2026-05-17",0,0,60.0,0,"평로라60km"],["2026-05-18",0,0,100.0,0,"파주 100km"],["2026-05-19",0,0,87.0,0,"영종도 87km"],["2026-05-20",0,0,0,0,"휴식"],["2026-05-21",14,0,0,0,"트레드밀 빌드업 & 인터벌"],["2026-05-22",1,0,35.0,0,"고정 사이클 35km. 근전환"],["2026-05-23",2,1000,65.0,0,"오전 수영 1000m/ 평로라65km. 근전환"],["2026-05-24",0,1200,0,0,"오전 수영 1200m"],["2026-05-25",6.27,500,0,0,"오전수영 500m"],["2026-05-26",12.02,0,0,0,""],["2026-05-27",3,0,70.0,0,"평로라 70km / 근전환"],["2026-05-28",0,0,0,1,"웨이트 트레이닝"],["2026-05-29",13,0,0,0,"트레드밀 빌드업 & 인터벌"],["2026-05-30",0,1500,0,0,"오전 수영 1,500m"],["2026-05-31",0,1000,40.0,0,"오전수영 1,000m/ 평로라 40km"],["2026-06-01",0,0,0,0,"휴식"],["2026-06-02",6.2,0,42.0,0,"아라뱃길 42km"],["2026-06-03",9,0,0,0,"하체 근력 보강운동"],["2026-06-05",0,1300,81.0,0,"오전수영 1,300m/ 평로라 81km"],["2026-06-06",11,0,0,0,"하체 근력 보강운동"],["2026-06-07",9.12,600,0,0,"오전수영 600m"],["2026-06-08",0,0,42.0,0,"아라뱃길 42km"],["2026-06-09",0,0,0,0,"휴식 - 굴포천 공사"],["2026-06-10",3,0,40.0,0,"오전 근력 / 평로라 40km"],["2026-06-11",0,0,90.0,0,"평로라 90km"],["2026-06-12",0,525,0,0,"오전 수영 525m"],["2026-06-13",0,0,0,0,"선수등록 및 검차"],["2026-06-14",21,0,0,0,"고성 아이언맨70.3"],["2026-06-15",0,0,0,0,"휴식"],["2026-06-16",0,0,0,0,"휴식"],["2026-06-17",0,0,0,0,"휴식"],["2026-06-18",0,0,0,0,"휴식"],["2026-06-19",0,425,0,0,"수영 425m"],["2026-06-20",0,0,0,0,"휴식"],["2026-06-21",0,0,0,0,"휴식"],["2026-06-24",0,0,0,1,"오전 웨이트"],["2026-06-25",0,0,0,1,"오전 웨이트"],["2026-06-26",6.2,0,0,0,""],["2026-06-28",0,500,0,0,"수영 500m"],["2026-07-01",7.69,0,0,1,"오전웨이트"],["2026-07-02",0,650,0,1,"오전웨이트오후수영 650m"],["2026-07-03",0,1050,0,1,"오전 웨이트 /오후수영 1050m"],["2026-07-04",0,0,0,1,"오전웨이트 /"],["2026-07-05",0,1500,0,1,"오전웨이트/오후수영 1500mm"],["2026-07-06",0,0,0,1,"오전 웨이트"],["2026-07-07",0,0,0,1,"오전 웨이트"],["2026-07-09",0,0,0,1,"오전 웨이트"],["2026-07-14",0,0,0,0,"7월 첫 휴일 피로 누적 휴식필요"],["2026-07-16",6,1100,0,0,"오전 수영 1100m"],["2026-07-17",10.74,1100,0,0,"오전 수영 1100m"],["2026-07-19",7.56,0,0,0,""],["2026-07-20",0,0,0,0,"휴식"],["2026-07-21",0,0,0,0,"휴식"],["2026-07-22",0,1000,0,0,"오전 수영 1000m"],["2026-07-23",9.26,2000,0,0,"오전수영 2000m"],["2026-07-24",0,0,0,1,"오전 웨이트"],["2026-07-25",0,1200,0,0,"오전 수영 1200m"],["2026-07-26",12.17,1000,0,0,"오전 수영 1000m"],["2026-07-30",6.32,1100,0,0,"오전 수영 1100m"],["2026-07-31",0,1100,0,0,"오전 수영 1100m"],["2026-08-01",9.56,0,0,0,""],["2026-08-03",0,2200,0,0,"오전 수영 2,200m"],["2026-08-04",0,0,0,1,"오전 웨이트"],["2026-08-05",6,825,0,0,"오전수영 825m"],["2026-08-08",9.24,0,0,0,""],["2026-08-11",0,2350,0,0,"오전 수영 2,350m"],["2026-08-12",6.37,0,0,0,""],["2026-08-13",11.66,0,0,1,"오후 웨이트"],["2026-08-15",0,1000,0,0,"오전 수영 1000m"],["2026-08-16",0,0,0,1,"오전 웨이트"],["2026-08-17",0,0,0,1,"오전 웨이트"],["2026-08-20",0,2500,0,0,"오전 수영 1000m/오후 1500m"],["2026-08-21",9.4,0,0,1,"오전 웨이트"],["2026-08-23",0,1700,0,0,"오후 수영 1700m"],["2026-08-24",7.82,0,0,0,""],["2026-08-25",0,0,0,1,"오전 웨이트"],["2026-08-27",0,1500,0,0,"오후 수영 1500m"],["2026-08-28",9.3,0,0,1,"오전 웨이트"],["2026-08-29",0,2400,0,0,"오후수영 2400m"],["2026-08-30",10,0,0,0,""],["2026-09-02",11,0,0,0,""],["2026-09-03",0,0,0,1,"오전 웨이트"],["2026-09-05",6.5,1700,0,0,"오전 수영 1700m"],["2026-09-06",10,0,0,0,""],["2026-09-07",10,0,37.0,0,"삼척 싸이클 37km"],["2026-09-09",0,0,0,1,"오전 웨이트"],["2026-09-10",0,0,0,1,"오전 웨이트"],["2026-09-11",9.4,0,0,0,""],["2026-09-12",10.3,1000,0,0,"오전 수영 1000m"],["2026-09-13",0,1000,0,0,"오전 수영 1000m"],["2026-09-14",0,0,43.0,0,"싸이클 43km"],["2026-09-16",8,0,0,1,"오전 웨이트"],["2026-09-18",0,0,0,1,"오전웨이트"],["2026-09-19",9.7,1300,0,0,"오전 수영 1300m"],["2026-09-21",0,0,100.0,0,"강릉~옥계 싸이클 100km"],["2026-09-23",0,1000,0,0,"오전 수영 1000m"],["2026-09-24",6.5,1100,0,0,"오전 수영 1100m"],["2026-09-25",0,2000,0,0,"오전 수영 2000m"],["2026-09-26",0,1500,0,0,"오전 수영 1500m"],["2026-10-01",9,0,0,0,""],["2026-10-02",0,0,0,1,"오전 웨이트"],["2026-10-03",0,1000,0,0,"오전 수영 1000m"],["2026-10-04",0,800,0,0,"오전 수영 800m"],["2026-10-07",6.2,0,0,1,"오전 웨이트"],["2026-10-09",0,1500,0,0,"오전수영 1500m"],["2026-10-11",0,1000,0,0,"오전 수영 1000m"],["2026-10-16",0,0,0,1,"오전 웨이트"],["2026-10-17",0,1100,0,0,"오전 수영 1100m"],["2026-10-20",0,0,40.0,0,"아라 40km"],["2026-10-22",0,0,0,1,"오전 웨이트"],["2026-10-23",0,0,0,1,"오전 웨이트"],["2026-10-24",0,1500,0,0,"오전 수영 1500m"],["2026-10-30",5,0,0,1,"오전 웨이트"],["2026-10-31",0,900,0,0,"오전 수영 900m"],["2026-11-03",10.5,0,0,0,""],["2026-11-04",8,0,0,0,""],["2026-11-05",0,0,0,1,"오전 웨이트"]];
+/* claude.ai 페이지에 남긴 기록 (처음 실행할 때 한 번만 옮김) */
+const SEED_LOGS = [{"id":"ex0cokvm146233pbiifw","date":"2026-11-07","run":9.5,"bike":0,"swim":0,"weight":false,"brick":false,"pain":false,"memo":"","createdAt":"2026-11-07T13:33:01.606Z"},{"id":"evnpoeg096zqx97qqqyu","date":"2026-11-11","run":8,"bike":0,"swim":0,"weight":false,"brick":false,"pain":false,"memo":"","createdAt":"2026-11-11T12:38:13.962Z"},{"id":"q9c0mevuyzxm4nikd2i9","date":"2026-11-12","run":13,"bike":0,"swim":0,"weight":false,"brick":false,"pain":false,"memo":"","createdAt":"2026-11-12T13:01:28.437Z"},{"id":"6r08tc7mjfaf254ddwyf","date":"2026-11-13","run":11,"bike":0,"swim":0,"weight":false,"brick":false,"pain":false,"memo":"","createdAt":"2026-11-13T12:34:24.777Z"},{"id":"uqmboo4pxvw4jgm0pims","date":"2026-11-15","run":0,"bike":0,"swim":0,"weight":true,"brick":false,"pain":false,"memo":"오전 웨이트","createdAt":"2026-11-14T23:55:03.199Z"},{"id":"qdldfbklmhqdyvukseey","date":"2026-11-16","run":17,"bike":10,"swim":0,"weight":false,"brick":false,"pain":false,"memo":"고정로라","createdAt":"2026-11-16T11:42:27.363Z"},{"id":"35r8n0gelrf6dwk00ai4","date":"2026-11-17","run":0,"bike":10,"swim":0,"weight":false,"brick":false,"pain":false,"memo":"로라","createdAt":"2026-11-17T14:58:42.002Z"}];
+
+const DEFAULT_GOALS = {
+  annual:{run:1300,bike:3000,swim:130},
+  yearEnd:{run:1050,bike:2700,swim:100},
+  weekly:{runKm:25,runN:3,bikeKm:70,bikeN:2,swimKm:4.5,swimN:3,weightN:2},
+  race:{name:"고성 아이언맨 70.3",date:"2027-06-06",prev:316,swim:36,t:6,bike:148,run:90}
+};
+const DISC = {run:{name:"달리기",unit:"km",color:"var(--run)",img:"img/run.jpg",pos:"center 30%"},bike:{name:"사이클",unit:"km",color:"var(--bike)",img:"img/bike.jpg",pos:"center 45%"},swim:{name:"수영",unit:"km",color:"var(--swim)",img:"img/swim.jpg",pos:"center 30%"}};
+const BASE_PHOTOS = [
+  {src:"img/finish.jpg",cap:"고성 아이언맨 70.3 피니시 라인",pos:"center"},
+  {src:"img/swim.jpg",cap:"수영 출구, 슈트 벗으며 바꿈터로",pos:"45% center"},
+  {src:"img/bike.jpg",cap:"에어로 자세로 바이크 구간",pos:"center 40%"},
+  {src:"img/run.jpg",cap:"해안 런 코스",pos:"center"}
+];
+const PAST_RACES = [
+  {date:"2026-06-14",name:"고성 아이언맨 70.3",type:"철인 70.3 (하프)",target:"5:00",result:"5:16",memo:"수영 40분 · 사이클 2:35 · 런 1:40 · 바꿈 10분 계획, 런 +15분",fixed:true},
+  {date:"2025-09-07",name:"삼척 그레이트맨",type:"올림픽 코스",target:"2:30",result:"2:40 · AG 9위",memo:"수영 31분 · 사이클 1:13 · 런 50분",fixed:true,approx:true}
+];
+
+let goals = JSON.parse(JSON.stringify(DEFAULT_GOALS));
+let logs=[], races=[], photos=[];
+let curDisc="run", recentN=30, fdb=null, online=false;
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=(n,d=1)=>(Math.round(n*Math.pow(10,d))/Math.pow(10,d)).toLocaleString("ko-KR",{maximumFractionDigits:d});
+const pad=n=>String(n).padStart(2,"0");
+const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parseYmd=s=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+const hm=m=>`${Math.floor(m/60)}:${pad(Math.round(m%60))}`;
+const mmss=m=>{let a=Math.floor(m),b=Math.round((m-a)*60);if(b===60){a++;b=0}return `${a}'${pad(b)}"`};
+const today=()=>{const t=new Date();return new Date(t.getFullYear(),t.getMonth(),t.getDate())};
+const sum=a=>a.reduce((x,y)=>x+y,0);
+const YEAR=()=>today().getFullYear();
+function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,2400)}
+
+function allEntries(){
+  const hist=DAILY.map(r=>({date:r[0],run:r[1]||0,swim:r[2]||0,bike:r[3]||0,weight:!!r[4],brick:false,pain:false,memo:r[5]||"",src:"excel"}));
+  const mine=logs.map(l=>({...l,run:+l.run||0,bike:+l.bike||0,swim:+l.swim||0,src:"app"}));
+  return hist.concat(mine);
+}
+function monthTotals(year){
+  const b=SUMMARY.months[year];
+  const out={run:b?[...b.run]:Array(12).fill(0),bike:b?[...b.bike]:Array(12).fill(0),swim:b&&b.swim?[...b.swim]:Array(12).fill(0)};
+  for(const l of logs){ if(!l.date||+l.date.slice(0,4)!==year) continue; const m=+l.date.slice(5,7)-1; out.run[m]+=+l.run||0; out.bike[m]+=+l.bike||0; out.swim[m]+=(+l.swim||0)/1000; }
+  return out;
+}
+
+function renderStrip(){
+  const a=goals.annual;
+  $("#goalStrip").innerHTML=`<span>RUN ${a.run.toLocaleString()}km</span><span>CYCLE ${a.bike.toLocaleString()}km</span><span>SWIM ${a.swim.toLocaleString()}km</span>`;
+}
+
+function renderSeason(){
+  const Y=YEAR(), mt=monthTotals(Y), t=today();
+  $("#seasonEyebrow").textContent=`${Y} Season`;
+  const yStart=new Date(Y,0,1), yEnd=new Date(Y,11,31);
+  const dayOfYear=Math.floor((t-yStart)/864e5)+1, daysInYear=Math.round((yEnd-yStart)/864e5)+1;
+  const daysLeft=Math.max(0,Math.floor((yEnd-t)/864e5)+1);
+  $("#discGrid").innerHTML=["run","bike","swim"].map(k=>{
+    const D=DISC[k], total=sum(mt[k]), goal=goals.annual[k]||1, real=goals.yearEnd[k]||goal;
+    const pct=total/goal*100, should=goal*dayOfYear/daysInYear, behind=should-total;
+    const perDay=daysLeft?Math.max(0,goal-total)/daysLeft:0;
+    const perWeekReal=daysLeft?Math.max(0,real-total)/(daysLeft/7):0;
+    const sp=should/goal*100;
+    const chip=pct>=sp-5?`<span class="chip good">페이스 유지</span>`:pct>=sp-20?`<span class="chip warn">뒤처짐</span>`:`<span class="chip bad">많이 뒤처짐</span>`;
+    return `<article class="disc">
+      <div class="photo" style="background-image:url(${D.img});background-position:${D.pos}"><span>${D.name}</span></div>
+      <div class="body">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">${chip}<span class="num" style="font-size:22px;font-weight:700;color:${D.color}">${fmt(pct,0)}%</span></div>
+        <div class="big"><span class="v num">${fmt(total,1)}</span><span class="g">/ ${goal.toLocaleString()}km</span></div>
+        <div class="bar" title="오늘까지 있어야 할 거리 ${fmt(should,0)}km"><i style="width:${Math.min(100,pct)}%;background:${D.color}"></i><span class="pace" style="left:${Math.min(100,sp)}%"></span></div>
+        <dl class="kv">
+          <dt>남은 거리</dt><dd>${fmt(Math.max(0,goal-total),1)}km</dd>
+          <dt>오늘 기준 차이</dt><dd style="color:${behind>0?'var(--bad)':'var(--good)'}">${behind>0?'-':'+'}${fmt(Math.abs(behind),0)}km</dd>
+          <dt>연 목표: 남은 ${daysLeft}일 하루</dt><dd>${fmt(perDay,1)}km</dd>
+          <dt>현실 목표 ${real.toLocaleString()}km: 주당</dt><dd>${fmt(perWeekReal,1)}km</dd>
+        </dl>
+      </div></article>`;
+  }).join("");
+}
+
+function renderChart(){
+  const k=curDisc, D=DISC[k], Y=YEAR();
+  const cur=monthTotals(Y)[k], prev=monthTotals(Y-1)[k];
+  const goalM=(goals.annual[k]||0)/12;
+  const W=720,H=270,L=44,R=12,T=16,B=34,iw=W-L-R,ih=H-T-B;
+  const maxV=Math.max(goalM,...cur,...prev,1)*1.1;
+  const step=maxV>400?200:maxV>150?50:maxV>40?20:5, top=Math.ceil(maxV/step)*step;
+  const y=v=>T+ih-(v/top)*ih, bw=iw/12;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${D.name} 월별 거리">`;
+  for(let v=0;v<=top;v+=step) s+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end" font-size="12" fill="var(--muted)" font-family="Barlow Condensed,sans-serif">${v}</text>`;
+  const nowM=today().getMonth();
+  cur.forEach((v,i)=>{const x=L+i*bw+bw*.2,w=bw*.6;
+    if(i<=nowM) s+=`<rect x="${x}" y="${y(v)}" width="${w}" height="${Math.max(0,y(0)-y(v))}" rx="3" fill="${D.color}"><title>${Y}년 ${i+1}월 ${fmt(v,1)}km</title></rect>`;
+    if(i<=nowM&&v>0) s+=`<text x="${x+w/2}" y="${y(v)-5}" text-anchor="middle" font-size="12" fill="var(--ink)" font-family="Barlow Condensed,sans-serif" font-weight="600">${fmt(v,v<20?1:0)}</text>`;
+    s+=`<text x="${L+i*bw+bw/2}" y="${H-12}" text-anchor="middle" font-size="12" fill="var(--muted)">${i+1}월</text>`;});
+  s+=`<path d="${prev.map((v,i)=>(i?"L":"M")+(L+i*bw+bw/2)+" "+y(v)).join("")}" fill="none" stroke="var(--muted)" stroke-width="1.6" opacity=".75"/>`;
+  prev.forEach((v,i)=>{s+=`<circle cx="${L+i*bw+bw/2}" cy="${y(v)}" r="3" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.6"><title>${Y-1}년 ${i+1}월 ${fmt(v,1)}km</title></circle>`});
+  s+=`<line x1="${L}" x2="${W-R}" y1="${y(goalM)}" y2="${y(goalM)}" stroke="var(--ink)" stroke-width="1.4" stroke-dasharray="6 5"/><text x="${W-R}" y="${y(goalM)-6}" text-anchor="end" font-size="12" fill="var(--ink)">월 목표 ${fmt(goalM,1)}km</text></svg>`;
+  $("#chart").innerHTML=s;
+  $("#chartLegend").innerHTML=`<span><i style="background:${D.color}"></i>${Y}</span><span><i style="background:transparent;border:1.6px solid var(--muted);border-radius:50%;width:10px"></i>${Y-1} 같은 달</span><span><i style="background:transparent;border-top:1.6px dashed var(--ink);height:0"></i>연 목표 ÷ 12</span>`;
+}
+
+function weekStart(d){const x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));return x}
+function renderWeek(){
+  const s=weekStart(today()),e=new Date(s);e.setDate(s.getDate()+6);
+  const a=ymd(s),b=ymd(e);
+  $("#wkRange").textContent=`${s.getMonth()+1}월 ${s.getDate()}일(월) ~ ${e.getMonth()+1}월 ${e.getDate()}일(일) · 기록에서 자동 집계`;
+  const wk=allEntries().filter(x=>x.date>=a&&x.date<=b), w=goals.weekly;
+  const items=[
+    {k:"run",name:"달리기",n:wk.filter(x=>x.run>0).length,nT:w.runN,v:sum(wk.map(x=>x.run)),vT:w.runKm,u:"km"},
+    {k:"bike",name:"사이클",n:wk.filter(x=>x.bike>0).length,nT:w.bikeN,v:sum(wk.map(x=>x.bike)),vT:w.bikeKm,u:"km"},
+    {k:"swim",name:"수영",n:wk.filter(x=>x.swim>0).length,nT:w.swimN,v:sum(wk.map(x=>x.swim))/1000,vT:w.swimKm,u:"km"},
+    {k:"weight",name:"웨이트",n:wk.filter(x=>x.weight).length,nT:w.weightN,v:null}];
+  $("#week").innerHTML=items.map(it=>{
+    const col=it.k==="weight"?"var(--weight)":DISC[it.k].color;
+    const pips=Array.from({length:Math.max(it.nT,it.n)},(_,i)=>`<b class="${i<it.n?'on':''}" style="${i<it.n?`background:${col}`:''}"></b>`).join("");
+    const done=it.n>=it.nT&&(it.v==null||it.v>=it.vT);
+    return `<div class="item"><div class="top"><h3 style="font-size:15px">${it.name}</h3>${done?'<span class="chip good">완료</span>':''}</div>
+      <div class="pips" aria-label="${it.n}/${it.nT}회">${pips}</div>
+      <div class="muted" style="font-size:13px">${it.n}/${it.nT}회${it.v!=null?` · <span class="num" style="font-size:16px;color:var(--ink);font-weight:600">${fmt(it.v,1)}</span>/${it.vT}${it.u}`:''}</div></div>`;
+  }).join("");
+}
+
+function renderHeat(){
+  const Y=YEAR(); $("#heatTitle").textContent=`${Y} 운동 캘린더`;
+  const by={};
+  for(const e of allEntries()){ if(+e.date.slice(0,4)!==Y) continue; const o=by[e.date]||(by[e.date]={run:0,bike:0,swim:0,weight:false,memo:[]}); o.run+=e.run;o.bike+=e.bike;o.swim+=e.swim;o.weight=o.weight||e.weight; if(e.memo)o.memo.push(e.memo); }
+  const first=weekStart(new Date(Y,0,1)),cell=12,gap=3,L=26,T=18,W=L+54*(cell+gap)+4,H=T+7*(cell+gap)+4;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${Y} 운동 캘린더">`;
+  ["월","","수","","금","","일"].forEach((d,i)=>{if(d)s+=`<text x="0" y="${T+i*(cell+gap)+10}" font-size="10" fill="var(--muted)">${d}</text>`});
+  for(let m=0;m<12;m++){const col=Math.floor((new Date(Y,m,1)-first)/(7*864e5));s+=`<text x="${L+col*(cell+gap)}" y="11" font-size="10" fill="var(--muted)">${m+1}월</text>`}
+  const t=today(),tk=ymd(t);
+  for(let w=0;w<54;w++)for(let i=0;i<7;i++){
+    const d=new Date(first);d.setDate(first.getDate()+w*7+i); if(d.getFullYear()!==Y)continue;
+    const k=ymd(d),o=by[k],lv=o?(o.run>0)+(o.bike>0)+(o.swim>0)+(o.weight?1:0):0;
+    const tip=o?`${d.getMonth()+1}/${d.getDate()} `+[o.run?`런 ${fmt(o.run,1)}km`:"",o.bike?`사이클 ${fmt(o.bike,0)}km`:"",o.swim?`수영 ${o.swim}m`:"",o.weight?"웨이트":""].filter(Boolean).join(" · ")+(o.memo.length?` (${o.memo.join(" / ")})`:""):`${d.getMonth()+1}/${d.getDate()}`;
+    s+=`<rect x="${L+w*(cell+gap)}" y="${T+i*(cell+gap)}" width="${cell}" height="${cell}" rx="2.5" fill="${lv?'var(--sea)':'var(--heat0)'}" fill-opacity="${lv?[0,.35,.6,.82,1][lv]:1}" ${d>t?'opacity=".45"':''} ${k===tk?'stroke="var(--accent)" stroke-width="1.6"':''}><title>${esc(tip)}</title></rect>`;
+  }
+  $("#heat").innerHTML=s+"</svg>";
+}
+
+function renderRace(){
+  const r=goals.race, total=r.swim+r.t+r.bike+r.run, prev=r.prev||0;
+  const plan26={swim:40,t:10,bike:155,run:100};
+  const items=[
+    {n:"수영 1.9km",m:r.swim,p:`100m당 ${mmss(r.swim/19)}`,old:plan26.swim,col:"var(--swim)"},
+    {n:"사이클 90km",m:r.bike,p:`평균 ${fmt(90/(r.bike/60),1)}km/h`,old:plan26.bike,col:"var(--bike)"},
+    {n:"달리기 21.1km",m:r.run,p:`km당 ${mmss(r.run/21.1)}`,old:plan26.run,col:"var(--run)",note:"2026 실제 약 1:55"},
+    {n:"바꿈터 T1+T2",m:r.t,p:"슈트·헬멧·신발 리허설",old:plan26.t,col:"var(--muted)"}];
+  $("#splits").innerHTML=items.map(it=>{const d=it.m-it.old;return `<div class="split" style="border-top:3px solid ${it.col}">
+    <span class="eyebrow">${it.n}</span><span class="t num">${hm(it.m)}</span><span class="p">${it.p}</span>
+    <span class="d" style="color:${d<0?'var(--good)':'var(--muted)'}">2026 계획 ${hm(it.old)} 대비 ${d<=0?'':'+'}${d}분</span>${it.note?`<span class="p">${it.note}</span>`:''}</div>`}).join("");
+  $("#splitSum").innerHTML=`${esc(r.name)} 목표 합계 <b class="num" style="font-size:18px;color:var(--ink)">${hm(total)}</b>${prev?` · 지난 기록 ${hm(prev)} 대비 ${total-prev}분`:''}`;
+  $("#raceEyebrow").textContent=`다음 레이스 · ${r.name}`;
+  $("#heroTarget").textContent=hm(total); $("#heroPrev").textContent=prev?hm(prev):"-"; $("#heroCut").textContent=prev?`${total-prev}분`:"-";
+  const rd=parseYmd(r.date),dd=Math.ceil((rd-today())/864e5);
+  $("#dday").textContent=dd>0?`D-${dd}`:dd===0?"D-DAY":`D+${-dd}`;
+  $("#raceDate").textContent=`${rd.getFullYear()}.${pad(rd.getMonth()+1)}.${pad(rd.getDate())}`;
+  const phases=[
+    {from:"2026-11-01",to:"2026-12-31",w:"2026.11–12",h:"동계 기초",b:"런 주 3회 재개, 로라 Z2, 수영 2km, 웨이트 유지"},
+    {from:"2027-01-01",to:"2027-02-28",w:"2027.01–02",h:"마일리지 빌드",b:"런 월 120km, 로라 스윗스팟, 1,900m 연속 수영"},
+    {from:"2027-03-01",to:"2027-04-30",w:"2027.03–04",h:"특화 훈련",b:"야외 100km 라이딩, 템포 런, 격주 브릭"},
+    {from:"2027-05-01",to:"2027-05-31",w:"2027.05",h:"레이스 준비",b:"레이스 페이스 브릭, 오픈워터, 바꿈 리허설"},
+    {from:"2027-06-01",to:"2027-06-30",w:"2027.06",h:"테이퍼 & 레이스",b:"훈련량 40~50% 감소, 컨디션 관리"}];
+  const tk=ymd(today());
+  $("#timeline").innerHTML=phases.map(p=>{const now=tk>=p.from&&tk<=p.to;return `<div class="${now?'now':''}"><span class="when">${p.w}${now?' · 지금':''}</span><h3 style="font-size:15px">${p.h}</h3><span class="muted">${p.b}</span></div>`}).join("");
+}
+
+function renderRaceList(){
+  const t=today(), all=[...races.map(r=>({...r,src:"app"})),...PAST_RACES];
+  const list=all.sort((a,b)=>{const pa=parseYmd(a.date)<t,pb=parseYmd(b.date)<t;if(pa!==pb)return pa?1:-1;return pa?b.date.localeCompare(a.date):a.date.localeCompare(b.date)});
+  $("#raceList").innerHTML=list.map(r=>{
+    const d=parseYmd(r.date),dd=Math.ceil((d-t)/864e5);
+    const chip=dd>0?`<span class="chip ${dd<=30?'bad':dd<=90?'warn':'good'}">D-${dd}</span>`:dd===0?`<span class="chip bad">D-DAY</span>`:`<span class="chip done">완료</span>`;
+    const big=r.result&&dd<0?r.result:(r.target||"-");
+    const attrs=r.src==="app"?`role="button" tabindex="0" data-race="${esc(r.id)}"`:"";
+    return `<div class="race${r.src==='app'?' tap':''}" ${attrs}><div style="display:grid;gap:4px;justify-items:start"><span class="num muted" style="font-size:16px">${d.getFullYear()}.${pad(d.getMonth()+1)}${r.approx?'':'.'+pad(d.getDate())}</span>${chip}</div>
+      <div style="min-width:0"><h3>${esc(r.name)}</h3><p class="muted" style="font-size:14px">${esc(r.type||'')}${r.target?` · 목표 ${esc(r.target)}`:''}${r.result?` · 결과 ${esc(r.result)}`:''}${r.memo?` · ${esc(r.memo)}`:''}</p></div>
+      <span class="t num">${esc(big)}</span></div>`;
+  }).join("");
+}
+
+function renderRecent(){
+  const list=allEntries().sort((a,b)=>b.date.localeCompare(a.date)||(b.src==="app")-(a.src==="app"));
+  const shown=list.slice(0,recentN); $("#moreBtn").hidden=list.length<=recentN;
+  $("#recent").innerHTML=shown.map(e=>{
+    const parts=[e.run?`<span class="tag run">런</span>${fmt(e.run,2)}km`:"",e.bike?`<span class="tag bike">사이클</span>${fmt(e.bike,1)}km`:"",e.swim?`<span class="tag swim">수영</span>${e.swim.toLocaleString()}m`:"",e.weight?`<span class="tag weight">웨이트</span>`:"",e.time?`<span class="muted">${e.time}분</span>`:"",e.brick?`<span class="chip warn">브릭</span>`:"",e.pain?`<span class="chip bad">통증</span>`:""].filter(Boolean).join(" ");
+    const d=parseYmd(e.date), app=e.src==="app";
+    return `<div class="r${app?' tap':''}" ${app?`role="button" tabindex="0" data-log="${esc(e.id)}"`:''}><span class="dt">${d.getFullYear()!==YEAR()?String(d.getFullYear()).slice(2)+'.':''}${d.getMonth()+1}.${pad(d.getDate())}<span class="muted" style="font-size:12px;font-weight:500"> ${"일월화수목금토"[d.getDay()]}</span></span><div style="min-width:0">${parts||'<span class="muted">휴식</span>'}${e.memo?`<div class="note">${esc(e.memo)}</div>`:''}</div>${app?'<span class="muted" aria-hidden="true">›</span>':'<span class="src">엑셀</span>'}</div>`;
+  }).join("")||`<p class="muted">아직 기록이 없습니다.</p>`;
+}
+
+function renderYears(){
+  const ys=[{y:"2023",sub:"9~12월 · 시작",run:SUMMARY.y2023.run,bike:SUMMARY.y2023.bike,swim:null}];
+  for(let y=2024;y<=YEAR();y++){const t=monthTotals(y);ys.push({y:String(y),sub:y===YEAR()?"진행 중":y===2025?"수영 목표 첫 달성":y===2024?"런 1,300 · 사이클 777":"",run:sum(t.run),bike:sum(t.bike),swim:y===2024?null:sum(t.swim)})}
+  $("#years").innerHTML=ys.map(o=>`<div class="year"><span class="y num">${o.y}</span><div class="muted" style="font-size:13px">${o.sub}</div><dl>
+    <dt style="color:var(--run)">런</dt><dd>${fmt(o.run,0)}km</dd><dt style="color:var(--bike)">사이클</dt><dd>${fmt(o.bike,0)}km</dd>
+    <dt style="color:var(--swim)">수영</dt><dd>${o.swim==null?'<span class="muted">-</span>':fmt(o.swim,1)+'km'}</dd></dl></div>`).join("");
+}
+
+function renderGallery(){
+  const mine=[...photos].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.createdAt||"").localeCompare(a.createdAt||""));
+  const a=mine.map(p=>`<figure role="button" tabindex="0" data-photo="${esc(p.id)}"><img src="${p.data}" alt="${esc(p.caption||'대회 사진')}" loading="lazy"><figcaption>${esc(p.caption||'')}${p.date?`<small>${esc(p.date.replace(/-/g,'.'))}</small>`:''}</figcaption></figure>`);
+  const b=BASE_PHOTOS.map((p,i)=>`<figure role="button" tabindex="0" data-base="${i}"><img src="${p.src}" alt="${esc(p.cap)}" loading="lazy" style="object-position:${p.pos}"><figcaption>${esc(p.cap)}</figcaption></figure>`);
+  $("#gallery").innerHTML=a.concat(b).join("");
+}
+
+function fillGoalForm(){
+  const g=goals, set=(id,v)=>$(id).value=v;
+  set("#aRun",g.annual.run);set("#aBike",g.annual.bike);set("#aSwim",g.annual.swim);
+  set("#gRun",g.yearEnd.run);set("#gBike",g.yearEnd.bike);set("#gSwim",g.yearEnd.swim);
+  set("#wRunKm",g.weekly.runKm);set("#wRunN",g.weekly.runN);set("#wBikeKm",g.weekly.bikeKm);set("#wBikeN",g.weekly.bikeN);set("#wSwimKm",g.weekly.swimKm);set("#wSwimN",g.weekly.swimN);set("#wWeightN",g.weekly.weightN);
+  set("#rName",g.race.name);set("#rDate",g.race.date);set("#rPrev",g.race.prev);set("#rSwim",g.race.swim);set("#rT",g.race.t);set("#rBike",g.race.bike);set("#rRun",g.race.run);
+}
+function renderLogsDependent(){renderSeason();renderChart();renderWeek();renderHeat();renderRecent();renderYears()}
+function renderAll(){renderStrip();renderLogsDependent();renderRace();renderRaceList();renderGallery()}
+
+/* ===== 시트 (입력 창) ===== */
+const FORMS=["#logForm","#raceForm","#photoForm","#photoView"];
+let lastFocus=null;
+function openSheet(kind,id){
+  lastFocus=document.activeElement;
+  FORMS.forEach(s=>$(s).hidden=true);
+  if(kind==="log"){
+    const l=id?logs.find(x=>x.id===id):null;
+    $("#sheetTitle").textContent=l?"기록 수정":"운동 기록하기";
+    $("#fId").value=l?l.id:""; $("#fDate").value=l?l.date:ymd(today());
+    $("#fRun").value=l&&l.run?l.run:""; $("#fBike").value=l&&l.bike?l.bike:""; $("#fSwim").value=l&&l.swim?l.swim:""; $("#fTime").value=l&&l.time?l.time:"";
+    $("#fWeight").checked=!!(l&&l.weight); $("#fBrick").checked=!!(l&&l.brick); $("#fPain").checked=!!(l&&l.pain); $("#fMemo").value=l?l.memo||"":"";
+    $("#fDel").hidden=!l; resetDel("#fDel"); $("#logStatus").textContent=""; $("#logForm").hidden=false;
+  } else if(kind==="race"){
+    const r=id?races.find(x=>x.id===id):null;
+    $("#sheetTitle").textContent=r?"대회 수정":"대회 추가";
+    $("#rcId").value=r?r.id:""; $("#rcName").value=r?r.name:""; $("#rcDate").value=r?r.date:""; $("#rcType").value=r?r.type:"철인 70.3 (하프)";
+    $("#rcTarget").value=r?r.target||"":""; $("#rcResult").value=r?r.result||"":""; $("#rcMemo").value=r?r.memo||"":"";
+    $("#rcDel").hidden=!r; resetDel("#rcDel"); $("#rcStatus").textContent=""; $("#raceForm").hidden=false;
+  } else if(kind==="photo"){
+    $("#sheetTitle").textContent="대회 사진 추가"; $("#pFile").value=""; $("#pCap").value=""; $("#pDate").value=ymd(today()); $("#pPreview").hidden=true; $("#pStatus").textContent=""; $("#photoForm").hidden=false;
+  } else if(kind==="view"){
+    const p=id.base!=null?{data:BASE_PHOTOS[id.base].src,caption:BASE_PHOTOS[id.base].cap,base:true}:photos.find(x=>x.id===id.id);
+    if(!p) return;
+    $("#sheetTitle").textContent="사진"; $("#pvImg").src=p.data; $("#pvCap").textContent=(p.caption||"")+(p.date?` · ${p.date.replace(/-/g,'.')}`:"");
+    $("#pvDel").hidden=!!p.base; $("#pvDel").dataset.id=p.id||""; resetDel("#pvDel"); $("#pvStatus").textContent=""; $("#photoView").hidden=false;
+  }
+  $("#veil").hidden=false; document.body.classList.add("locked");
+  setTimeout(()=>{const f=$("#veil").querySelector("form:not([hidden]) input:not([type=hidden]), #photoView:not([hidden]) button");if(f&&kind!=="log")f.focus()},50);
+}
+function closeSheet(){ $("#veil").hidden=true; document.body.classList.remove("locked"); if(lastFocus&&lastFocus.focus)lastFocus.focus(); }
+function resetDel(sel){const b=$(sel);b.dataset.armed="";b.textContent=sel==="#pvDel"?"이 사진 삭제":"삭제";b.disabled=false}
+function armed(b){ if(b.dataset.armed==="1") return true; b.dataset.armed="1"; b.textContent="한 번 더 누르면 삭제"; return false; }
+$("#sheetClose").addEventListener("click",closeSheet);
+$("#veil").addEventListener("click",e=>{if(e.target.id==="veil")closeSheet()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#veil").hidden)closeSheet()});
+document.addEventListener("click",e=>{
+  const o=e.target.closest("[data-open]"); if(o){e.preventDefault();openSheet(o.dataset.open);return}
+  const l=e.target.closest("[data-log]"); if(l){openSheet("log",l.dataset.log);return}
+  const r=e.target.closest("[data-race]"); if(r){openSheet("race",r.dataset.race);return}
+  const p=e.target.closest("[data-photo]"); if(p){openSheet("view",{id:p.dataset.photo});return}
+  const bp=e.target.closest("[data-base]"); if(bp){openSheet("view",{base:+bp.dataset.base});return}
+});
+document.addEventListener("keydown",e=>{ if((e.key==="Enter"||e.key===" ")&&e.target.matches("[role=button][tabindex]")){e.preventDefault();e.target.click()} });
+document.querySelectorAll(".tab[data-d]").forEach(b=>b.addEventListener("click",()=>{curDisc=b.dataset.d;document.querySelectorAll(".tab[data-d]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));renderChart()}));
+$("#moreBtn").addEventListener("click",()=>{recentN+=30;renderRecent()});
+
+/* ===== 저장 ===== */
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+function needDb(statusSel){ if(fdb) return true; $(statusSel).textContent="저장소에 연결되지 않았습니다. 인터넷 연결을 확인하고 새로고침해 주세요."; return false; }
+// 오프라인일 때 Firestore는 기기에 먼저 저장하고 연결되면 올립니다. 응답을 오래 기다리지 않도록 짧게 기다립니다.
+const settle=p=>Promise.race([p,new Promise(r=>setTimeout(()=>r("queued"),2500))]);
+
+$("#logForm").addEventListener("submit",async e=>{
+  e.preventDefault(); if(!needDb("#logStatus")) return;
+  const id=$("#fId").value||uid();
+  const doc={date:$("#fDate").value,run:+$("#fRun").value||0,bike:+$("#fBike").value||0,swim:+$("#fSwim").value||0,time:+$("#fTime").value||0,
+    weight:$("#fWeight").checked,brick:$("#fBrick").checked,pain:$("#fPain").checked,memo:$("#fMemo").value.trim(),updatedAt:new Date().toISOString()};
+  if(!doc.date){$("#logStatus").textContent="날짜를 골라 주세요.";return}
+  if(!doc.run&&!doc.bike&&!doc.swim&&!doc.weight&&!doc.memo){$("#logStatus").textContent="거리, 웨이트, 메모 중 하나는 입력해 주세요.";return}
+  const old=logs.find(x=>x.id===id); if(old&&old.createdAt) doc.createdAt=old.createdAt; else doc.createdAt=doc.updatedAt;
+  $("#fSave").disabled=true;
+  try{ const r=await settle(fdb.collection(COL.logs).doc(id).set(doc)); closeSheet(); toast(r==="queued"?"기기에 저장했어요 · 연결되면 자동으로 올라가요":"기록을 저장했어요"); }
+  catch(err){ $("#logStatus").textContent="저장하지 못했습니다. 잠시 후 다시 눌러 주세요."; }
+  finally{ $("#fSave").disabled=false; }
+});
+$("#fDel").addEventListener("click",async e=>{const b=e.currentTarget; if(!armed(b)||!fdb) return; b.disabled=true;
+  try{await settle(fdb.collection(COL.logs).doc($("#fId").value).delete());closeSheet();toast("기록을 삭제했어요")}catch(err){b.disabled=false;$("#logStatus").textContent="삭제하지 못했습니다."}});
+
+$("#raceForm").addEventListener("submit",async e=>{
+  e.preventDefault(); if(!needDb("#rcStatus")) return;
+  const id=$("#rcId").value||uid();
+  const r={name:$("#rcName").value.trim(),date:$("#rcDate").value,type:$("#rcType").value,target:$("#rcTarget").value.trim(),result:$("#rcResult").value.trim(),memo:$("#rcMemo").value.trim(),updatedAt:new Date().toISOString()};
+  if(!r.name||!r.date){$("#rcStatus").textContent="대회명과 날짜를 입력해 주세요.";return}
+  $("#rcSave").disabled=true;
+  try{const x=await settle(fdb.collection(COL.races).doc(id).set(r));closeSheet();toast(x==="queued"?"기기에 저장했어요 · 연결되면 자동으로 올라가요":"대회를 저장했어요")}
+  catch(err){$("#rcStatus").textContent="저장하지 못했습니다."} finally{$("#rcSave").disabled=false}
+});
+$("#rcDel").addEventListener("click",async e=>{const b=e.currentTarget; if(!armed(b)||!fdb) return; b.disabled=true;
+  try{await settle(fdb.collection(COL.races).doc($("#rcId").value).delete());closeSheet();toast("대회를 삭제했어요")}catch(err){b.disabled=false}});
+
+$("#goalForm").addEventListener("submit",async e=>{
+  e.preventDefault(); if(!needDb("#goalStatus")) return;
+  const n=(s,d)=>{const v=parseFloat($(s).value);return isFinite(v)&&v>=0?v:d}, D=DEFAULT_GOALS;
+  const g={annual:{run:n("#aRun",D.annual.run),bike:n("#aBike",D.annual.bike),swim:n("#aSwim",D.annual.swim)},
+    yearEnd:{run:n("#gRun",D.yearEnd.run),bike:n("#gBike",D.yearEnd.bike),swim:n("#gSwim",D.yearEnd.swim)},
+    weekly:{runKm:n("#wRunKm",25),runN:Math.round(n("#wRunN",3)),bikeKm:n("#wBikeKm",70),bikeN:Math.round(n("#wBikeN",2)),swimKm:n("#wSwimKm",4.5),swimN:Math.round(n("#wSwimN",3)),weightN:Math.round(n("#wWeightN",2))},
+    race:{name:$("#rName").value.trim()||D.race.name,date:$("#rDate").value||D.race.date,prev:n("#rPrev",0),swim:n("#rSwim",36),t:n("#rT",6),bike:n("#rBike",148),run:n("#rRun",90)}};
+  $("#gSave").disabled=true;
+  try{const x=await settle(fdb.collection(COL.meta).doc("goals").set(g));$("#goalStatus").textContent=x==="queued"?"기기에 저장했어요. 연결되면 자동으로 올라가요.":"목표를 저장했어요."}
+  catch(err){$("#goalStatus").textContent="저장하지 못했습니다."} finally{$("#gSave").disabled=false}
+});
+
+/* 사진: 휴대폰 사진을 긴 변 1400px JPEG로 줄여 Firestore 문서(1MB 제한) 안에 저장 */
+async function shrink(file){
+  const url=URL.createObjectURL(file);
+  try{
+    const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url});
+    let max=1400;
+    for(let tries=0;tries<6;tries++){
+      const sc=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
+      const c=document.createElement("canvas");c.width=Math.round(img.naturalWidth*sc);c.height=Math.round(img.naturalHeight*sc);
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+      for(const q of [.82,.72,.62]){const d=c.toDataURL("image/jpeg",q); if(d.length<900000) return d;}
+      max=Math.round(max*.8);
+    }
+    throw new Error("too_big");
+  } finally { URL.revokeObjectURL(url); }
+}
+$("#pFile").addEventListener("change",async()=>{const f=$("#pFile").files[0];if(!f)return;$("#pStatus").textContent="사진 준비 중…";
+  try{const d=await shrink(f);$("#pPreview").src=d;$("#pPreview").hidden=false;$("#pPreview").dataset.ready=d;$("#pStatus").textContent=`준비 완료 (${Math.round(d.length*.75/1024)}KB)`}
+  catch(err){$("#pStatus").textContent="이 사진은 열 수 없어요. 다른 사진을 골라 주세요.";$("#pPreview").hidden=true;$("#pPreview").dataset.ready=""}});
+$("#photoForm").addEventListener("submit",async e=>{
+  e.preventDefault(); if(!needDb("#pStatus")) return;
+  const d=$("#pPreview").dataset.ready; if(!d){$("#pStatus").textContent="사진을 먼저 골라 주세요.";return}
+  $("#pSave").disabled=true; $("#pStatus").textContent="올리는 중…";
+  try{const x=await settle(fdb.collection(COL.photos).doc(uid()).set({data:d,caption:$("#pCap").value.trim(),date:$("#pDate").value||ymd(today()),createdAt:new Date().toISOString()}));
+    $("#pPreview").dataset.ready="";closeSheet();toast(x==="queued"?"기기에 저장했어요 · 연결되면 자동으로 올라가요":"사진을 올렸어요")}
+  catch(err){$("#pStatus").textContent="올리지 못했습니다. 잠시 후 다시 시도해 주세요."} finally{$("#pSave").disabled=false}
+});
+$("#pvDel").addEventListener("click",async e=>{const b=e.currentTarget; if(!armed(b)||!fdb) return; b.disabled=true;
+  try{await settle(fdb.collection(COL.photos).doc(b.dataset.id).delete());closeSheet();toast("사진을 삭제했어요")}catch(err){b.disabled=false;$("#pvStatus").textContent="삭제하지 못했습니다."}});
+
+/* ===== 연결 ===== */
+function setConn(state,text){const c=$("#conn");c.className="conn "+state;c.querySelector("b").textContent=text}
+function loadScript(src,ms=8000){return new Promise((res,rej)=>{const s=document.createElement("script");s.src=src;const to=setTimeout(()=>rej(new Error("timeout")),ms);s.onload=()=>{clearTimeout(to);res()};s.onerror=()=>{clearTimeout(to);rej(new Error("load"))};document.head.appendChild(s)})}
+async function seedOnce(){
+  if(!SEED_LOGS.length) return;
+  const ref=fdb.collection(COL.meta).doc("seed");
+  const s=await ref.get({source:"server"}).catch(()=>null);
+  if(!s||s.exists) return;
+  const b=fdb.batch();
+  SEED_LOGS.forEach(l=>{const {id,...d}=l;b.set(fdb.collection(COL.logs).doc(id),d,{merge:true})});
+  b.set(ref,{done:true,at:new Date().toISOString(),count:SEED_LOGS.length});
+  await b.commit();
+}
+async function init(){
+  fillGoalForm(); renderAll();
+  window.addEventListener("online",()=>setConn(online?"ok":"wait",online?"실시간 연결":"연결 중"));
+  window.addEventListener("offline",()=>setConn("off","오프라인 · 기기에 저장"));
+  try{
+    await loadScript("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js");
+    await loadScript("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js");
+  }catch(e){ setConn("off","연결 안 됨 · 엑셀 기록만 표시"); return; }
+  if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+  fdb=firebase.firestore();
+  try{ await fdb.enablePersistence({synchronizeTabs:true}); }catch(e){}
+  const onErr=()=>setConn("off","불러오기 실패 · 새로고침해 주세요");
+  const mark=snap=>{ if(!snap.metadata.fromCache){online=true;setConn("ok","실시간 연결")} else if(!navigator.onLine) setConn("off","오프라인 · 기기에 저장"); };
+  fdb.collection(COL.logs).onSnapshot({includeMetadataChanges:false},snap=>{logs=snap.docs.map(d=>({id:d.id,...d.data()}));mark(snap);renderLogsDependent()},onErr);
+  fdb.collection(COL.races).onSnapshot(snap=>{races=snap.docs.map(d=>({id:d.id,...d.data()}));renderRaceList()},onErr);
+  fdb.collection(COL.photos).onSnapshot(snap=>{photos=snap.docs.map(d=>({id:d.id,...d.data()}));renderGallery()},onErr);
+  fdb.collection(COL.meta).doc("goals").onSnapshot(snap=>{
+    if(snap.exists){const g=snap.data(),D=DEFAULT_GOALS;goals={annual:{...D.annual,...(g.annual||{})},yearEnd:{...D.yearEnd,...(g.yearEnd||{})},weekly:{...D.weekly,...(g.weekly||{})},race:{...D.race,...(g.race||{})}};
+      fillGoalForm();renderStrip();renderLogsDependent();renderRace();}
+  },onErr);
+  setTimeout(()=>{if(!online)setConn(navigator.onLine?"wait":"off",navigator.onLine?"연결이 느려요 · 저장은 됩니다":"오프라인 · 기기에 저장")},10000);
+  seedOnce().catch(()=>{});
+}
+init();
+if("serviceWorker" in navigator && location.protocol==="https:"){ window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{})); }
+</script>
+</body>
+</html>
