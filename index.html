@@ -344,65 +344,21 @@ select{appearance:auto}
 
 <section id="gaps"><div class="wrap">
   <div class="sec-head">
-    <div><p class="eyebrow">Diagnosis · 2026.11 기준</p><h2>부족한 부분</h2></div>
-    <p class="muted">2026년 1월~11월 6일 엑셀 기록에서 뽑은 진단입니다. 빨강은 지금 바로 메워야 할 곳, 노랑은 관리가 필요한 곳, 초록은 잘 지키고 있는 습관입니다.</p>
+    <div><p class="eyebrow" id="gapEyebrow">Diagnosis · 최근 4주</p><h2>부족한 부분</h2></div>
+    <p class="muted" id="gapNote">최근 4주 기록과 설정한 주간 목표를 비교해 자동으로 진단합니다. 기록을 저장하면 바로 다시 계산돼요. 빨강은 지금 메워야 할 곳, 노랑은 관리가 필요한 곳, 초록은 잘 지키고 있는 습관입니다.</p>
   </div>
-  <div class="gaps">
-    <div class="gap bad"><span class="chip bad">시급</span><div><h3>달리기가 10월부터 거의 멈췄어요</h3><p>10월 20.2km(3회), 11월 초 18.5km(2회). 상반기 월평균 98km의 5분의 1 수준이었습니다.</p></div><div class="fig num">20.2km<small>10월 런</small></div></div>
-    <div class="gap bad"><span class="chip bad">시급</span><div><h3>사이클은 하반기에 공백</h3><p>2~6월 1,954km를 탔지만 7~10월은 4개월 합계 220km(7·8월 0km). 겨울엔 실내 로라로 이어가야 3월에 다시 시작하지 않아도 됩니다.</p></div><div class="fig num">220km<small>7~10월 합계</small></div></div>
-    <div class="gap warn"><span class="chip warn">관리</span><div><h3>수영은 자주 가지만 한 번에 짧게</h3><p>7~10월 34회, 1회 평균 약 1.3km. 레이스 거리 1.9km보다 짧고, 연 목표 130km 중 70.7km(54%)로 달성률이 가장 낮았습니다.</p></div><div class="fig num">54%<small>수영 연 목표</small></div></div>
-    <div class="gap warn"><span class="chip warn">관리</span><div><h3>통증이 반복해서 훈련을 끊어요</h3><p>1월 허리 통증, 3월 왼쪽 무릎 염증으로 잠정 휴식, 4월 계양산 트레일런 중 무릎 통증, 8월 메모 "근력 부족 - 통증 발생". 2025년 11월엔 팔꿈치 엘보도 있었습니다.</p></div><div class="fig num">4회<small>올해 통증 메모</small></div></div>
-    <div class="gap warn"><span class="chip warn">관리</span><div><h3>70.3 레이스 후반 런이 무너짐</h3><p>2026 고성 70.3 계획은 런 1시간 40분, 실제는 계획보다 약 15분 더 걸려 5시간 16분 완주. 바이크 뒤 달리기(브릭) 경험이 더 필요합니다.</p></div><div class="fig num">+15분<small>런 계획 대비</small></div></div>
-    <div class="gap good"><span class="chip good">잘하는 중</span><div><h3>웨이트와 수영 출석은 꾸준해요</h3><p>7~10월 웨이트 매달 5~9회, 수영 매달 7~11회. 이 습관을 그대로 두고 런·사이클을 다시 얹는 게 이번 겨울의 핵심입니다.</p></div><div class="fig num">27회<small>7~10월 웨이트</small></div></div>
-  </div>
+  <div class="gaps" id="gapList"></div>
 </div></section>
 
 <section id="methods"><div class="wrap">
   <div class="sec-head">
-    <div><p class="eyebrow">How to fill</p><h2>채우는 방법</h2></div>
-    <p class="muted">부족한 부분마다 이번 겨울에 할 일을 정리했습니다. 통증이 며칠 이어지면 강도를 낮추고 진료를 먼저 받으세요.</p>
+    <div><p class="eyebrow">How to fill · 다음 7일</p><h2>채우는 방법</h2></div>
+    <p class="muted">위 진단에 맞춰 다음 한 주에 할 일을 최근 기록 숫자로 계산했어요. 통증이 며칠 이어지면 강도를 낮추고 진료를 먼저 받으세요.</p>
   </div>
-  <div class="methods">
-    <article class="method"><header><span class="dot" style="background:var(--run)"></span><h3>달리기 다시 쌓기</h3></header>
-      <ul>
-        <li>주 3회 요일 고정: 화 조깅 8km · 목 템포 6~8km · 토 LSD 12km에서 시작해 18km까지</li>
-        <li>주간 거리는 한 번에 10%씩만 늘리기 (20 → 22 → 25km)</li>
-        <li>무릎이 회복될 때까지 트레일·급내리막 코스는 보류</li>
-        <li>케이던스 170~180, 보폭을 짧게 가져가 무릎 충격 줄이기</li>
-      </ul>
-      <p class="why">목표: 주 25km. 겨울 8주면 약 200km.</p>
-    </article>
-    <article class="method"><header><span class="dot" style="background:var(--bike)"></span><h3>겨울 사이클은 실내 로라로</h3></header>
-      <ul>
-        <li>싸이플러스 T2 로라 주 2회: ① Z2 60~90분 ② 스윗스팟 20분 × 2</li>
-        <li>로라 탈 때 TT바 에어로 자세를 20분 이상 유지하는 연습</li>
-        <li>주말 로라 뒤 바로 3km 런으로 근전환</li>
-        <li>날 좋은 휴일엔 아라뱃길·한강 40~60km로 야외 감각 유지</li>
-      </ul>
-      <p class="why">목표: 주 70km. 겨울 8주면 약 560km.</p>
-    </article>
-    <article class="method"><header><span class="dot" style="background:var(--swim)"></span><h3>수영 1회 거리 늘리기</h3></header>
-      <ul>
-        <li>1회 1.3km → 2km: 워밍업 300 + 메인 1,400 + 쿨다운 300</li>
-        <li>메인 세트: 100m × 10, 휴식 15초, 같은 페이스 유지</li>
-        <li>월 1회 1,900m 연속 수영 타임 테스트, 기록 메모에 남기기</li>
-        <li>주 1회 영법 드릴 (캐치업, 6킥 1스트로크)</li>
-      </ul>
-      <p class="why">목표: 주 4.5km. 레이스 1.9km를 쉬지 않고 36분 안에.</p>
-    </article>
-    <article class="method"><header><span class="dot" style="background:var(--weight)"></span><h3>통증 줄이는 근력·회복</h3></header>
-      <ul>
-        <li>주 2회 하체·코어: 스쿼트, 런지, 힙브릿지, 데드버그, 플랭크</li>
-        <li>런 전 동적 스트레칭 10분, 런 후 폼롤러로 허벅지·종아리</li>
-        <li>통증 메모가 생기면 그 주는 강도 대신 거리를 줄이기</li>
-        <li>바꿈터 리허설 월 1회 (슈트 → 헬멧 → 신발), 10분을 6분으로</li>
-      </ul>
-      <p class="why">지금 하는 웨이트 습관을 유지하면서 회복 루틴만 추가.</p>
-    </article>
-  </div>
+  <div class="methods" id="methodList"></div>
 
   <div class="panel" style="margin-top:16px">
-    <h3>겨울 한 주 예시</h3>
+    <h3>한 주 기본 틀 (겨울 예시)</h3>
     <div class="week-table"><table>
       <thead><tr><th>요일</th><th>훈련</th><th>포인트</th></tr></thead>
       <tbody>
@@ -793,7 +749,97 @@ function fillGoalForm(){
   set("#wRunKm",g.weekly.runKm);set("#wRunN",g.weekly.runN);set("#wBikeKm",g.weekly.bikeKm);set("#wBikeN",g.weekly.bikeN);set("#wSwimKm",g.weekly.swimKm);set("#wSwimN",g.weekly.swimN);set("#wWeightN",g.weekly.weightN);
   set("#rName",g.race.name);set("#rDate",g.race.date);set("#rPrev",g.race.prev);set("#rSwim",g.race.swim);set("#rT",g.race.t);set("#rBike",g.race.bike);set("#rRun",g.race.run);
 }
-function renderLogsDependent(){renderSeason();renderChart();renderWeek();renderHeat();renderRecent();renderYears()}
+
+/* ===== 자동 진단 · 채우는 방법 (기록이 바뀔 때마다 다시 계산) ===== */
+const PAIN_RE=/통증|염증|부상|아픔|아파|엘보|쥐남|저림/;
+function windowEntries(days){const end=today(),st=new Date(end);st.setDate(end.getDate()-days+1);const a=ymd(st),b=ymd(end);return {list:allEntries().filter(e=>e.date>=a&&e.date<=b),from:st,to:end}}
+const r5=x=>Math.max(0,Math.round(x/5)*5), r1=x=>Math.round(x*10)/10;
+function md(d){const x=typeof d==="string"?parseYmd(d):d;return `${x.getMonth()+1}/${x.getDate()}`}
+function coach(){
+  const g=goals.weekly, W4=windowEntries(28), W8=windowEntries(56), L=W4.list;
+  const sumk=(arr,k)=>sum(arr.map(e=>+e[k]||0)), cnt=(arr,f)=>arr.filter(f).length;
+  const run4=sumk(L,"run"),bike4=sumk(L,"bike"),swim4=sumk(L,"swim")/1000;
+  const nRun=cnt(L,e=>e.run>0),nBike=cnt(L,e=>e.bike>0),nSwim=cnt(L,e=>e.swim>0),nW=cnt(L,e=>e.weight);
+  const swim8=W8.list.filter(e=>e.swim>0), swimAvg=swim8.length?sum(swim8.map(e=>e.swim))/swim8.length:0;
+  const maxRun=Math.max(0,...L.map(e=>e.run));
+  const pains=W4.list.filter(e=>e.pain||PAIN_RE.test(e.memo||""));
+  const bricks=windowEntries(42).list.filter(e=>e.brick||(e.run>0&&e.bike>0)).length;
+  const all=allEntries().filter(e=>e.run||e.bike||e.swim||e.weight).map(e=>e.date).sort();
+  const last=all.length?all[all.length-1]:null, idle=last?Math.floor((today()-parseYmd(last))/864e5):99;
+  const dRace=Math.ceil((parseYmd(goals.race.date)-today())/864e5);
+  const mon=today().getMonth(), winter=mon>=10||mon<=1;
+  const Y=YEAR(), mt=monthTotals(Y), doy=Math.floor((today()-new Date(Y,0,1))/864e5)+1;
+  const yearGap=k=>{const goal=goals.annual[k]||0,tot=sum(mt[k]);return {tot,goal,remain:Math.max(0,goal-tot),behind:goal*doy/365-tot}};
+  const out=[];
+  const lvl=(r)=>r<.5?"bad":r<.85?"warn":"good";
+  // 달리기
+  {const r=run4/(g.runKm*4||1),yg=yearGap("run"),sev=lvl(r);
+   out.push({k:"run",sev,fig:`${fmt(run4,1)}km`,figL:"최근 4주 런",
+    t:sev==="good"?"달리기 주간 목표를 지키고 있어요":`최근 4주 달리기가 목표의 ${Math.round(r*100)}%예요`,
+    p:`4주 동안 ${nRun}회 ${fmt(run4,1)}km (주 평균 ${fmt(run4/4,1)}km). 주 목표 ${g.runKm}km × 4주 = ${g.runKm*4}km 기준.${yg.goal?` 올해 ${fmt(yg.tot,0)}/${yg.goal.toLocaleString()}km, 남은 거리 ${fmt(yg.remain,0)}km.`:''}`,
+    d:{run4,nRun,maxRun}});}
+  // 사이클
+  {const r=bike4/(g.bikeKm*4||1),sev=lvl(r);
+   out.push({k:"bike",sev,fig:`${fmt(bike4,0)}km`,figL:"최근 4주 사이클",
+    t:sev==="good"?"사이클 주간 목표를 지키고 있어요":`최근 4주 사이클이 목표의 ${Math.round(r*100)}%예요`,
+    p:`4주 동안 ${nBike}회 ${fmt(bike4,0)}km (주 평균 ${fmt(bike4/4,0)}km). 주 목표 ${g.bikeKm}km 기준.${winter&&sev!=="good"?' 겨울엔 실내 로라로 이어가는 게 핵심이에요.':''}`,
+    d:{bike4,nBike}});}
+  // 수영 (양)
+  {const r=swim4/(g.swimKm*4||1),sev=lvl(r);
+   out.push({k:"swim",sev,fig:`${fmt(swim4,1)}km`,figL:"최근 4주 수영",
+    t:sev==="good"?"수영 주간 목표를 지키고 있어요":`최근 4주 수영이 목표의 ${Math.round(r*100)}%예요`,
+    p:`4주 동안 ${nSwim}회 ${fmt(swim4,1)}km. 주 목표 ${g.swimKm}km 기준.`,d:{swim4,nSwim}});}
+  // 수영 (1회 거리)
+  if(swim8.length>=2&&swimAvg<1900) out.push({k:"swimlen",sev:"warn",fig:`${Math.round(swimAvg).toLocaleString()}m`,figL:"1회 평균 (8주)",
+    t:"수영 한 번에 가는 거리가 짧아요",p:`최근 8주 ${swim8.length}회, 1회 평균 ${Math.round(swimAvg).toLocaleString()}m. 레이스 1,900m를 쉬지 않고 가려면 1회 거리를 늘려야 해요.`,d:{swimAvg}});
+  // 통증
+  if(pains.length) out.push({k:"pain",sev:pains.length>=2?"bad":"warn",fig:`${pains.length}회`,figL:"최근 4주 통증",
+    t:"통증 기록이 있어요",p:pains.slice(-3).map(e=>`${md(e.date)} ${e.memo?`"${e.memo.slice(0,24)}"`:'통증 체크'}`).join(" · ")+". 통증이 이어지면 거리보다 회복이 먼저예요.",d:{n:pains.length}});
+  // 쉰 날
+  if(idle>=4&&idle<99) out.push({k:"idle",sev:idle>=7?"bad":"warn",fig:`${idle}일`,figL:"마지막 운동 후",t:`${idle}일째 운동 기록이 없어요`,p:`마지막 기록은 ${md(last)}. 짧게라도 다시 시작하면 흐름이 이어져요.`,d:{idle}});
+  // 브릭
+  if(dRace>0&&dRace<=210&&bricks===0) out.push({k:"brick",sev:dRace<=120?"bad":"warn",fig:"0회",figL:"최근 6주 브릭",
+    t:"바이크 뒤 달리기(브릭) 연습이 없어요",p:`대회까지 D-${dRace}. 2026 고성에서 런이 계획보다 15분 늦었던 구간이라, 미리 몸을 적응시켜야 해요.`,d:{dRace}});
+  // 장거리 런
+  if(dRace>0&&dRace<=240&&maxRun<15) out.push({k:"long",sev:"warn",fig:`${fmt(maxRun,1)}km`,figL:"최근 4주 최장 런",
+    t:"긴 거리 달리기가 부족해요",p:`최근 4주 가장 길게 뛴 거리는 ${fmt(maxRun,1)}km. 하프 21.1km를 버티려면 봄까지 18km 이상 LSD가 필요해요.`,d:{maxRun}});
+  // 웨이트
+  {const r=nW/((g.weightN||1)*4),sev=r>=.75?"good":r>=.4?"warn":"bad";
+   out.push({k:"weight",sev,fig:`${nW}회`,figL:"최근 4주 웨이트",t:sev==="good"?"웨이트를 꾸준히 하고 있어요":"웨이트 횟수가 줄었어요",
+    p:`4주 동안 ${nW}회 (목표 주 ${g.weightN}회 = ${g.weightN*4}회). 근력이 떨어지면 통증이 다시 생기기 쉬워요.`,d:{nW}});}
+  const order={bad:0,warn:1,good:2};
+  out.sort((a,b)=>order[a.sev]-order[b.sev]);
+  return {items:out,from:W4.from,to:W4.to,n:L.length,winter,dRace};
+}
+function methodFor(it,ctx){
+  const g=goals.weekly, wk=(ctx.n||0);
+  switch(it.k){
+    case "run":{const base=Math.max(it.d.run4/4,8),t=Math.min(g.runKm,Math.max(10,Math.round(base*1.1)));const a=Math.round(t*.3),b=Math.round(t*.25),c=Math.max(0,t-a-b);
+      return {c:"var(--run)",h:`다음 7일 달리기 ${t}km`,li:[`3회로 나누기: 조깅 ${a}km · 템포 ${b}km · LSD ${c}km`,`최근 주 평균 ${fmt(it.d.run4/4,1)}km에서 10%만 늘린 거리예요`,`템포는 4'40"~5'00"/km, LSD는 대화 가능한 속도`,`케이던스 170~180, 무릎이 불편하면 트레일·내리막은 빼기`],why:`주 목표 ${g.runKm}km까지 매주 10%씩 올려요.`};}
+    case "bike":{const t=Math.min(g.bikeKm,Math.max(30,r5(it.d.bike4/4*1.15)));const min=Math.round(t/28*60);
+      return {c:"var(--bike)",h:ctx.winter?`다음 7일 로라 ${t}km`:`다음 7일 사이클 ${t}km`,li:ctx.winter?[`싸이플러스 T2 로라 ${g.bikeN}회, 합계 약 ${min}분 (1회 ${Math.round(min/(g.bikeN||1))}분)`,`1회는 Z2로 편하게, 1회는 스윗스팟 ${min>=100?'20분 × 2':'10분 × 2'} 넣기`,`TT바 에어로 자세를 20분 이상 유지`,`주말 로라 뒤 바로 3km 런으로 근전환`]:[`${g.bikeN}회, 1회 ${Math.round(t/g.bikeN)}km 안팎`,`1회는 평속 유지 지구력, 1회는 언덕·인터벌`,`TT바 에어로 자세 유지 연습`,`장거리 후 바로 런 3~5km`],why:`최근 주 평균 ${fmt(it.d.bike4/4,0)}km → 주 목표 ${g.bikeKm}km까지 단계적으로.`};}
+    case "swim":return {c:"var(--swim)",h:`다음 7일 수영 ${g.swimN}회`,li:[`주 합계 ${g.swimKm}km (1회 약 ${Math.round(g.swimKm*1000/g.swimN/100)*100}m)`,`워밍업 300 · 메인 세트 · 쿨다운 200`,`주 1회 영법 드릴 (캐치업, 6킥 1스트로크)`],why:`최근 4주 ${it.d.nSwim}회 ${fmt(it.d.swim4,1)}km.`};
+    case "swimlen":{const t=Math.min(2000,Math.ceil((it.d.swimAvg+200)/100)*100),reps=Math.max(6,Math.round((t-500)/100));
+      return {c:"var(--swim)",h:`수영 1회 ${t.toLocaleString()}m로 늘리기`,li:[`워밍업 300 + 메인 100m × ${reps} (휴식 15초) + 쿨다운 200`,`같은 페이스로 끝까지 유지하는 게 목표`,`월 1회 1,900m 연속 수영 타임 테스트 → 메모에 시간 남기기`],why:`지금 1회 평균 ${Math.round(it.d.swimAvg).toLocaleString()}m에서 200m씩 늘려요.`};}
+    case "pain":return {c:"var(--bad)",h:"통증 먼저 다스리기",li:["이번 주는 거리를 20~30% 줄이고 강도(템포·인터벌)는 빼기","런 전 동적 스트레칭 10분, 런 후 폼롤러","통증 부위에 부담 없는 종목(수영·로라)으로 대체","3일 넘게 이어지면 운동을 멈추고 진료받기"],why:`최근 4주 통증 기록 ${it.d.n}회.`};
+    case "idle":return {c:"var(--accent)",h:"오늘 다시 시작하기",li:["오늘 30분 가볍게: 조깅 5km 또는 로라 40분","내일은 수영이나 웨이트로 이어가기","기록을 남기면 이 진단이 바로 바뀌어요"],why:`${it.d.idle}일 쉬었어요. 첫날은 짧게.`};
+    case "brick":return {c:"var(--warn)",h:"브릭 연습 시작하기",li:["이번 주말: 로라 60분 → 바로 런 3km","2주마다 런 거리 1~2km씩 늘리기 (봄까지 8km)","운동 기록에서 '브릭' 체크하기"],why:`대회까지 D-${it.d.dRace}.`};
+    case "long":{const t=Math.min(21,Math.max(10,Math.round(it.d.maxRun+2)));return {c:"var(--run)",h:`이번 주 LSD ${t}km`,li:[`최근 4주 최장 ${fmt(it.d.maxRun,1)}km에서 2km 늘리기`,"페이스보다 끝까지 일정한 속도가 목표","2주에 한 번씩 2km씩 늘려 18km까지"],why:"하프 거리를 버티는 바탕이 돼요."};}
+    case "weight":return {c:"var(--weight)",h:`웨이트 주 ${g.weightN}회 지키기`,li:["하체·코어: 스쿼트, 런지, 힙브릿지, 데드버그, 플랭크","런 없는 날이나 수영 후에 30~40분","무릎·허리 통증 예방이 목적이라 무게보다 자세"],why:`최근 4주 ${it.d.nW}회.`};
+  }
+  return null;
+}
+function renderCoach(){
+  const c=coach(), lab={bad:"시급",warn:"관리",good:"잘하는 중"};
+  $("#gapEyebrow").textContent=`Diagnosis · ${md(c.from)} ~ ${md(c.to)}`;
+  $("#gapList").innerHTML=c.items.map(it=>`<div class="gap ${it.sev}"><span class="chip ${it.sev}">${lab[it.sev]}</span><div><h3>${esc(it.t)}</h3><p>${esc(it.p)}</p></div><div class="fig num">${esc(it.fig)}<small>${esc(it.figL)}</small></div></div>`).join("");
+  const todo=c.items.filter(it=>it.sev!=="good").map(it=>methodFor(it,c)).filter(Boolean).slice(0,6);
+  const keep=c.items.filter(it=>it.sev==="good").map(it=>({run:"달리기",bike:"사이클",swim:"수영",weight:"웨이트"}[it.k])).filter(Boolean);
+  if(!todo.length) todo.push({c:"var(--good)",h:"지금 페이스 그대로",li:["주간 목표를 모두 지키고 있어요","다음 주도 같은 계획으로, 4주에 한 번은 가볍게 쉬어 가기"],why:"잘하고 있어요."});
+  $("#methodList").innerHTML=todo.map(m=>`<article class="method"><header><span class="dot" style="background:${m.c}"></span><h3>${esc(m.h)}</h3></header><ul>${m.li.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><p class="why">${esc(m.why)}</p></article>`).join("")
+    +(keep.length&&todo[0].h!=="지금 페이스 그대로"?`<article class="method"><header><span class="dot" style="background:var(--good)"></span><h3>지금처럼 유지</h3></header><ul><li>${esc(keep.join(" · "))}는 주간 목표를 지키고 있어요</li><li>이 습관은 그대로 두고 위 항목만 채우기</li></ul><p class="why">잘하는 건 바꾸지 않아요.</p></article>`:"");
+}
+function renderLogsDependent(){renderSeason();renderChart();renderWeek();renderHeat();renderRecent();renderYears();renderCoach()}
 function renderAll(){renderStrip();renderLogsDependent();renderRace();renderRaceList();renderGallery()}
 
 /* ===== 시트 (입력 창) ===== */
