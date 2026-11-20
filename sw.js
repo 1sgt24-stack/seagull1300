@@ -1,6 +1,6 @@
 /* 갈매기 1300 - 앱 화면을 기기에 저장해 두어 인터넷이 약해도 열리게 합니다.
    기록 데이터는 Firebase가 따로 저장·동기화하므로 여기서는 화면 파일만 다룹니다. */
-const CACHE = 'gull1300-v2';
+const CACHE = 'gull1300-v3';
 const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png',
   './img/finish.jpg', './img/swim.jpg', './img/bike.jpg', './img/run.jpg'];
 
